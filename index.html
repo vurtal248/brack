@@ -1468,7 +1468,8 @@
         <div class="score-submit-footer">
           <button class="btn-reset-scores" id="btn-reset-scores">Reset Scores</button>
           <!-- Save without declaring a winner (mid-series) -->
-          <button class="btn-save-no-winner" id="btn-save-no-winner" title="Save scores without declaring a winner yet">Save Only</button>
+          <button class="btn-save-no-winner" id="btn-save-no-winner"
+            title="Save scores without declaring a winner yet">Save Only</button>
           <button class="btn-submit-scores" id="btn-save-score">Declare Winner →</button>
         </div>
       </div>
@@ -1652,12 +1653,27 @@
 
     function isSlotDead(bracket, roundIdx, matchIdx, slotIdx) {
       if (roundIdx === 0) return true;
-      const prevRound = roundIdx - 1;
+      const prevRoundIdx = roundIdx - 1;
       const prevMatchIdx = matchIdx * 2 + slotIdx;
-      const prevMatch = bracket.rounds[prevRound][prevMatchIdx];
-      // A slot is dead if its source match has both participants as null
-      if (prevMatch.p1Id == null && prevMatch.p2Id == null) return true;
-      return false;
+      const prevMatch = bracket.rounds[prevRoundIdx][prevMatchIdx];
+
+      // If the previous match hasn't been played yet (has live participants but no winner),
+      // this slot is NOT dead — it's just waiting for a result.
+      if (prevMatch.p1Id != null || prevMatch.p2Id != null) {
+        // There are participants; the slot is only dead if the match is done
+        // but its winner somehow won't reach here — that can't happen normally.
+        // Treat as live (not dead) unless the match already has a winner and
+        // that winner went somewhere else. In normal single-elimination that
+        // never happens, so if there are participants the slot is NOT dead.
+        return false;
+      }
+
+      // Both participants in the feeder match are null — trace further back
+      // to see if any earlier match could still feed someone in (recursive).
+      if (prevRoundIdx === 0) return true;
+      // Check whether both feeder slots of the feeder match are also dead
+      return isSlotDead(bracket, prevRoundIdx, prevMatchIdx, 0) &&
+        isSlotDead(bracket, prevRoundIdx, prevMatchIdx, 1);
     }
 
     /**
