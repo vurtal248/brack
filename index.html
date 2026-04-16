@@ -2190,13 +2190,29 @@
 
       for (let mIdx = startIdx; mIdx < endIdx; mIdx++) {
         const match = bracket.rounds[r][mIdx];
-        const matchEl = buildMatchCard(bracket, match, r, mIdx, prefix);
         const wrapper = document.createElement('div');
         wrapper.style.flex = '1';
         wrapper.style.display = 'flex';
         wrapper.style.alignItems = 'center';
         wrapper.style.justifyContent = 'center';
-        wrapper.appendChild(matchEl);
+
+        // Bye match: exactly one slot is null — the other auto-advanced.
+        // Don't render a card; just leave an invisible spacer so the
+        // surrounding flex layout stays vertically balanced.
+        const isBye = (match.p1Id == null) !== (match.p2Id == null);
+        if (isBye) {
+          // Invisible spacer — same width as a match card so connectors align
+          const spacer = document.createElement('div');
+          spacer.style.width = '180px';
+          spacer.style.margin = '0.35rem 0.5rem';
+          spacer.setAttribute('aria-hidden', 'true');
+          spacer.id = `match-${prefix}-${r}-${mIdx}`;
+          wrapper.appendChild(spacer);
+        } else {
+          const matchEl = buildMatchCard(bracket, match, r, mIdx, prefix);
+          wrapper.appendChild(matchEl);
+        }
+
         matchesWrap.appendChild(wrapper);
       }
       col.appendChild(matchesWrap);
@@ -2621,46 +2637,72 @@
       connectorCol.appendChild(svg);
 
       for (let m = startM; m < endM; m += 2) {
-        let validM = m;
         // In double sided right half, nextMatchIdx is shifted
         let nextMatchIdx = Math.floor(m / 2);
 
         let topM = bracket.rounds[r][m];
-        let btmM = bracket.rounds[r][m + 1] || topM; // fallback just in case
+        let btmM = bracket.rounds[r][m + 1] || topM;
+
+        // Detect bye slots: exactly one of p1Id/p2Id is null
+        const topIsBye = topM && (topM.p1Id == null) !== (topM.p2Id == null);
+        const btmIsBye = btmM && (btmM.p1Id == null) !== (btmM.p2Id == null);
 
         const topMatchEl = document.getElementById(`match-${srcPre}-${r}-${m}`);
         const btmMatchEl = document.getElementById(`match-${srcPre}-${r}-${m + 1}`);
         const nextMatchEl = document.getElementById(`match-${dstPre}-${r + 1}-${nextMatchIdx}`);
 
-        if (!topMatchEl || !btmMatchEl || !nextMatchEl) continue;
+        if (!nextMatchEl) continue;
 
-        const topRect = topMatchEl.getBoundingClientRect();
-        const btmRect = btmMatchEl.getBoundingClientRect();
         const nxtRect = nextMatchEl.getBoundingClientRect();
-
-        let x0 = topRect.right - colRect.left;
-        let xEnd = nxtRect.left - colRect.left;
-        if (isReversed) {
-          x0 = topRect.left - colRect.left;
-          xEnd = nxtRect.right - colRect.left;
-        }
-
+        const xEnd = isReversed
+          ? nxtRect.right - colRect.left
+          : nxtRect.left - colRect.left;
         const xMid = colRect.width / 2;
-        const y1 = topRect.top + topRect.height / 2 - colRect.top;
-        const y2 = btmRect.top + btmRect.height / 2 - colRect.top;
-        const yMid = (y1 + y2) / 2;
+        const yDst = nxtRect.top + nxtRect.height / 2 - colRect.top;
 
-        const topWon = topM?.winnerId != null;
-        const btmWon = bracket.rounds[r][m + 1]?.winnerId != null;
         const nextExists = bracket.rounds[r + 1][nextMatchIdx]?.p1Id != null || bracket.rounds[r + 1][nextMatchIdx]?.p2Id != null;
 
-        const cssVar = topWon || btmWon ? 'var(--win)' : 'var(--border)';
-        const sw = topWon || btmWon ? '1.5' : '1';
+        // Both real matches — standard two-arm connector
+        if (!topIsBye && !btmIsBye && topMatchEl && btmMatchEl) {
+          const topRect = topMatchEl.getBoundingClientRect();
+          const btmRect = btmMatchEl.getBoundingClientRect();
+          const x0top = isReversed ? topRect.left - colRect.left : topRect.right - colRect.left;
+          const x0btm = isReversed ? btmRect.left - colRect.left : btmRect.right - colRect.left;
 
-        makePath(svg, `M ${x0} ${y1} H ${xMid}`, cssVar, sw, 'none', topWon);
-        makePath(svg, `M ${x0} ${y2} H ${xMid}`, cssVar, sw, 'none', btmWon);
-        makePath(svg, `M ${xMid} ${y1} V ${y2}`, cssVar, sw, 'none', topWon && btmWon);
-        makePath(svg, `M ${xMid} ${yMid} H ${xEnd}`, cssVar, sw, 'none', nextExists);
+          const y1 = topRect.top + topRect.height / 2 - colRect.top;
+          const y2 = btmRect.top + btmRect.height / 2 - colRect.top;
+          const yMid = (y1 + y2) / 2;
+
+          const topWon = topM?.winnerId != null;
+          const btmWon = btmM?.winnerId != null;
+          const cssVar = topWon || btmWon ? 'var(--win)' : 'var(--border)';
+          const sw = topWon || btmWon ? '1.5' : '1';
+
+          makePath(svg, `M ${x0top} ${y1} H ${xMid}`, cssVar, sw, 'none', topWon);
+          makePath(svg, `M ${x0btm} ${y2} H ${xMid}`, cssVar, sw, 'none', btmWon);
+          makePath(svg, `M ${xMid} ${y1} V ${y2}`, cssVar, sw, 'none', topWon && btmWon);
+          makePath(svg, `M ${xMid} ${yMid} H ${xEnd}`, cssVar, sw, 'none', nextExists);
+
+        } else {
+          // One (or both) is a bye — draw a single straight line from the real
+          // match card directly to the next-round card, skipping the merge arm.
+          const realMatchEl = topIsBye ? btmMatchEl : topMatchEl;
+          const realM = topIsBye ? btmM : topM;
+          if (!realMatchEl) {
+            // Both are byes — nothing to draw
+            continue;
+          }
+          const realRect = realMatchEl.getBoundingClientRect();
+          const x0 = isReversed ? realRect.left - colRect.left : realRect.right - colRect.left;
+          const y1 = realRect.top + realRect.height / 2 - colRect.top;
+
+          const won = realM?.winnerId != null;
+          const cssVar = won ? 'var(--win)' : 'var(--border)';
+          const sw = won ? '1.5' : '1';
+
+          // Horizontal to mid, then step to dst Y, then to next card
+          makePath(svg, `M ${x0} ${y1} H ${xMid} V ${yDst} H ${xEnd}`, cssVar, sw, 'none', nextExists);
+        }
       }
     }
 
