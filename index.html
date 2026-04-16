@@ -506,7 +506,7 @@
     .editor-wrap {
       display: flex;
       flex-direction: column;
-      min-height: calc(100dvh - 50px);
+      height: calc(100dvh - 50px);
     }
 
     .editor-bar {
@@ -1278,11 +1278,18 @@
       return rounds;
     }
 
-    function startBracket(bracket) {
-      bracket.status = 'active';
-      bracket.rounds = buildInitialRounds(bracket);
-      
-      // Cascade byes
+    function updateBracketStatus(bracket) {
+      if (bracket.status === 'seeding') return bracket;
+      const lastRound = bracket.rounds[bracket.rounds.length - 1];
+      if (lastRound && lastRound.length === 1 && lastRound[0].winnerId != null) {
+        bracket.status = 'complete';
+      } else {
+        bracket.status = 'active';
+      }
+      return bracket;
+    }
+    
+    function cascadeByes(bracket) {
       let changed = true;
       while (changed) {
         changed = false;
@@ -1293,22 +1300,29 @@
               if (match.p1Id != null && match.p2Id == null) {
                 // Determine if p2 slot is genuinely empty because of byes, or just unresolved
                 if (r === 0 || isSlotDead(bracket, r, m, 1)) {
-                  match.winnerId = match.p1Id;
                   changed = true;
-                  advanceWinner(bracket, r, m, match.p1Id);
+                  bracket = advanceWinner(bracket, r, m, match.p1Id);
                 }
               }
               else if (match.p2Id != null && match.p1Id == null) {
                 if (r === 0 || isSlotDead(bracket, r, m, 0)) {
-                  match.winnerId = match.p2Id;
                   changed = true;
-                  advanceWinner(bracket, r, m, match.p2Id);
+                  bracket = advanceWinner(bracket, r, m, match.p2Id);
                 }
               }
             }
           }
         }
       }
+      return bracket;
+    }
+
+    function startBracket(bracket) {
+      bracket.status = 'active';
+      bracket.rounds = buildInitialRounds(bracket);
+      
+      bracket = cascadeByes(bracket);
+      bracket = updateBracketStatus(bracket);
       
       return bracket;
     }
@@ -1323,29 +1337,53 @@
       return false;
     }
 
-
     /**
      * After a winner is picked in match (roundIdx, matchIdx),
      * advance them to the next round.
      */
     function advanceWinner(bracket, roundIdx, matchIdx, winnerId) {
-      bracket.rounds[roundIdx][matchIdx].winnerId = winnerId;
+      const match = bracket.rounds[roundIdx][matchIdx];
+      const oldWinnerId = match.winnerId;
+      
+      match.winnerId = winnerId;
 
-      const nextRound = roundIdx + 1;
-      if (nextRound >= bracket.rounds.length) {
-        // Final resolved → complete
-        bracket.status = 'complete';
-        return bracket;
+      if (oldWinnerId !== winnerId) {
+        let r = roundIdx + 1;
+        let m = Math.floor(matchIdx / 2);
+        let isP1 = matchIdx % 2 === 0;
+
+        if (r < bracket.rounds.length) {
+          // Place winner into next-round match
+          if (isP1) bracket.rounds[r][m].p1Id = winnerId;
+          else bracket.rounds[r][m].p2Id = winnerId;
+
+          // Clear old winner downstream if they had advanced
+          let currR = r;
+          let currM = m;
+          while (currR < bracket.rounds.length) {
+            let currMatch = bracket.rounds[currR][currM];
+            if (oldWinnerId != null && currMatch.winnerId === oldWinnerId) {
+              currMatch.winnerId = null;
+
+              let nextR = currR + 1;
+              if (nextR < bracket.rounds.length) {
+                let nextM = Math.floor(currM / 2);
+                let nextIsP1 = currM % 2 === 0;
+                if (nextIsP1) bracket.rounds[nextR][nextM].p1Id = null;
+                else bracket.rounds[nextR][nextM].p2Id = null;
+
+                currR = nextR;
+                currM = nextM;
+              } else {
+                break;
+              }
+            } else {
+              break;
+            }
+          }
+        }
       }
 
-      // Place winner into next-round match
-      const nextMatchIdx = Math.floor(matchIdx / 2);
-      const isP1 = matchIdx % 2 === 0;
-      if (isP1) {
-        bracket.rounds[nextRound][nextMatchIdx].p1Id = winnerId;
-      } else {
-        bracket.rounds[nextRound][nextMatchIdx].p2Id = winnerId;
-      }
       return bracket;
     }
 
@@ -1832,7 +1870,7 @@
       card.id = `match-${prefix}-${roundIdx}-${matchIdx}`;
       card.style.margin = '0.35rem 0.5rem';
 
-      const canPick = bracket.status === 'active' && match.winnerId == null && match.p1Id != null && match.p2Id != null;
+      const canPick = (bracket.status === 'active' || bracket.status === 'complete') && match.p1Id != null && match.p2Id != null;
 
       if (canPick) {
         card.style.cursor = 'pointer';
@@ -2029,6 +2067,9 @@
       }
 
       bracket = advanceWinner(bracket, currentScoreMatch.r, currentScoreMatch.m, winnerId);
+      bracket = cascadeByes(bracket);
+      bracket = updateBracketStatus(bracket);
+      
       upsertBracket(bracket);
       closeScoreModal();
       renderEditor();
