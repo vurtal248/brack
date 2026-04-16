@@ -441,6 +441,19 @@
       word-break: break-word;
     }
 
+    .score-participant {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      transition: border-color var(--transition);
+    }
+
+    .score-participant:hover {
+      border-color: var(--text);
+    }
+
     .score-name.vs {
       background: transparent;
       border: none;
@@ -1119,25 +1132,23 @@
       
       <div id="score-modal-body">
         <div class="score-names">
-          <div class="score-name" id="score-p1-name">Player 1</div>
+          <label class="score-name score-participant" id="score-p1-label">
+            <input type="checkbox" class="score-check" id="score-p1-radio" style="accent-color: var(--win); cursor: pointer; width: 1.1rem; height: 1.1rem;">
+            <span id="score-p1-name">Player 1</span>
+          </label>
           <div class="score-name vs">vs</div>
-          <div class="score-name" id="score-p2-name">Player 2</div>
+          <label class="score-name score-participant" id="score-p2-label">
+            <span id="score-p2-name">Player 2</span>
+            <input type="checkbox" class="score-check" id="score-p2-radio" style="accent-color: var(--win); cursor: pointer; width: 1.1rem; height: 1.1rem;">
+          </label>
         </div>
 
         <div id="score-sets-container">
           <!-- Sets dynamically injected -->
         </div>
-        <button class="btn btn-ghost" id="btn-add-set" style="width:100%; justify-content:center; margin-bottom: 1.5rem;">
+        <button class="btn btn-ghost" id="btn-add-set" style="width:100%; justify-content:center; margin-bottom: 0.5rem;">
           + Add Set
         </button>
-
-        <div class="form-group">
-          <label class="form-label" for="score-winner-select">Winner Override (Default Auto)</label>
-          <select id="score-winner-select">
-            <option value="auto">Auto-calculate from Sets</option>
-            <!-- Dynamic participant options -->
-          </select>
-        </div>
       </div>
 
       <div class="modal-footer">
@@ -1877,6 +1888,51 @@
     /* ── SCORE MODAL ── */
     let currentScoreMatch = null;
     let matchSets = [];
+    let userOverriddenWinner = null;
+
+    function calculateAutoWinner(sets) {
+       let p1Wins = 0, p2Wins = 0;
+       sets.forEach(s => {
+         const p1 = parseFloat(s.p1);
+         const p2 = parseFloat(s.p2);
+         if (!isNaN(p1) && !isNaN(p2)) {
+           if (p1 > p2) p1Wins++;
+           else if (p2 > p1) p2Wins++;
+         }
+       });
+       if (p1Wins > p2Wins) return 'p1';
+       if (p2Wins > p1Wins) return 'p2';
+       return null;
+    }
+
+    function updateWinnerCheckmarks(autoUpdate = false) {
+      if (autoUpdate) {
+        userOverriddenWinner = null;
+      }
+      let winnerToSelect = userOverriddenWinner || calculateAutoWinner(matchSets);
+      document.getElementById('score-p1-radio').checked = (winnerToSelect === 'p1');
+      document.getElementById('score-p2-radio').checked = (winnerToSelect === 'p2');
+    }
+
+    document.getElementById('score-p1-radio').addEventListener('change', () => {
+      if (document.getElementById('score-p1-radio').checked) {
+        userOverriddenWinner = 'p1';
+        document.getElementById('score-p2-radio').checked = false;
+      } else {
+        userOverriddenWinner = null;
+        updateWinnerCheckmarks();
+      }
+    });
+
+    document.getElementById('score-p2-radio').addEventListener('change', () => {
+      if (document.getElementById('score-p2-radio').checked) {
+        userOverriddenWinner = 'p2';
+        document.getElementById('score-p1-radio').checked = false;
+      } else {
+        userOverriddenWinner = null;
+        updateWinnerCheckmarks();
+      }
+    });
 
     function openScoreModal(r, m) {
       let bracket = getBracket(currentBracketId);
@@ -1892,15 +1948,15 @@
       document.getElementById('score-p1-name').textContent = p1Name;
       document.getElementById('score-p2-name').textContent = p2Name;
 
-      const sel = document.getElementById('score-winner-select');
-      sel.innerHTML = `
-        <option value="auto">Auto-calculate from Sets</option>
-        <option value="${match.p1Id}">${p1Name}</option>
-        <option value="${match.p2Id}">${p2Name}</option>
-      `;
-      sel.value = 'auto';
+      if (match.winnerId != null) {
+        if (match.winnerId === match.p1Id) userOverriddenWinner = 'p1';
+        else if (match.winnerId === match.p2Id) userOverriddenWinner = 'p2';
+      } else {
+        userOverriddenWinner = null;
+      }
 
       renderSets();
+      updateWinnerCheckmarks();
       document.getElementById('score-modal').classList.add('open');
     }
 
@@ -1940,6 +1996,7 @@
           const idx = parseInt(e.target.dataset.idx);
           if (e.target.classList.contains('set-p1')) matchSets[idx].p1 = e.target.value;
           else matchSets[idx].p2 = e.target.value;
+          updateWinnerCheckmarks(true);
         });
       });
 
@@ -1948,6 +2005,7 @@
           const idx = parseInt(e.target.dataset.idx);
           matchSets.splice(idx, 1);
           renderSets();
+          updateWinnerCheckmarks(true);
         });
       });
     }
@@ -1957,26 +2015,17 @@
       let bracket = getBracket(currentBracketId);
       const match = bracket.rounds[currentScoreMatch.r][currentScoreMatch.m];
       
-      const cleanSets = matchSets.map(s => ({ p1: parseInt(s.p1) || 0, p2: parseInt(s.p2) || 0 }));
+      const cleanSets = matchSets.map(s => ({ p1: s.p1 !== '' ? parseFloat(s.p1) : 0, p2: s.p2 !== '' ? parseFloat(s.p2) : 0 }));
       match.sets = cleanSets;
 
-      const override = document.getElementById('score-winner-select').value;
       let winnerId = null;
-
-      if (override === 'auto') {
-        let p1Wins = 0, p2Wins = 0;
-        cleanSets.forEach(s => {
-          if (s.p1 > s.p2) p1Wins++;
-          else if (s.p2 > s.p1) p2Wins++;
-        });
-        if (p1Wins > p2Wins) winnerId = match.p1Id;
-        else if (p2Wins > p1Wins) winnerId = match.p2Id;
-        else {
-          alert('Cannot auto-calculate winner: Sets are tied. Please manually select the winner.');
-          return;
-        }
+      if (document.getElementById('score-p1-radio').checked) {
+        winnerId = match.p1Id;
+      } else if (document.getElementById('score-p2-radio').checked) {
+        winnerId = match.p2Id;
       } else {
-        winnerId = parseInt(override);
+        alert('Cannot save match: No winner selected. Please enter scores or check a participant to win.');
+        return;
       }
 
       bracket = advanceWinner(bracket, currentScoreMatch.r, currentScoreMatch.m, winnerId);
