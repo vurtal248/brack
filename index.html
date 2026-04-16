@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BracketHQ — Tournament Bracket Builder</title>
+  <meta name="description" content="Create, seed, and run single-elimination tournament brackets locally. No account required — everything saves in your browser." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@300;400;500;700&family=Chivo:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500&display=swap" rel="stylesheet" />
+  <style>
+    /* ============================================================
+       MINIMALIST DESIGN TOKENS
+    ============================================================ */
+    :root {
+      color-scheme: light dark;
+      --bg: light-dark(oklch(0.98 0 0), oklch(0.1 0 0));
+      --bg-2: light-dark(oklch(1 0 0), oklch(0.13 0 0));
+      --bg-3: light-dark(oklch(0.95 0 0), oklch(0.18 0 0));
+      --border: light-dark(oklch(0.85 0 0), oklch(0.25 0 0));
+      --border-hi: light-dark(oklch(0.7 0 0), oklch(0.35 0 0));
+      --text: light-dark(oklch(0.2 0 0), oklch(0.9 0 0));
+      --text-dim: light-dark(oklch(0.45 0 0), oklch(0.6 0 0));
+      --accent: light-dark(oklch(0.4 0.1 260), oklch(0.7 0.1 260));
+      --accent-dim: light-dark(oklch(0.95 0.02 260), oklch(0.2 0.05 260));
+      --win: light-dark(oklch(0.5 0.1 150), oklch(0.85 0.1 150));
+      --win-glow: light-dark(oklch(0.94 0.05 150), oklch(0.18 0.05 150));
+      --elim-text: var(--text-dim);
+      --danger: light-dark(oklch(0.5 0.15 25), oklch(0.7 0.15 25));
+      --danger-dim: light-dark(oklch(0.95 0.05 25), oklch(0.2 0.05 25));
+      --radius: 2px;
+      --radius-lg: 4px;
+      --font-display: 'Chivo', sans-serif;
+      --font-mono: 'Chivo Mono', monospace;
+      --transition: 0.1s linear;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.6; min-height: 100dvh; overflow-x: hidden; }
+    button { cursor: pointer; font-family: var(--font-display); border: none; background: none; }
+    input, select, textarea { font-family: var(--font-mono); font-size: 0.875rem; background: var(--bg-2); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.5rem 0.75rem; width: 100%; outline: none; transition: border-color var(--transition); }
+    input:focus, select:focus { border-color: var(--text); }
+    select option { background: var(--bg-2); }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* LAYOUT & HEADER */
+    .app-header { position: sticky; top: 0; z-index: 100; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; height: 50px; }
+    .logo { font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text); display: flex; align-items: center; gap: 0.5rem; }
+    .logo-bracket { color: var(--text-dim); }
+    .logo-dot { display: none; }
+
+    /* BUTTONS */
+    .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 1rem; border-radius: var(--radius); font-weight: 600; font-size: 0.8rem; letter-spacing: 0.05em; text-transform: uppercase; transition: all var(--transition); white-space: nowrap; border: 1px solid transparent; }
+    .btn-primary { background: var(--text); color: var(--bg); }
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-ghost { color: var(--text); border: 1px solid var(--border); background: var(--bg-2); }
+    .btn-ghost:hover { border-color: var(--text); }
+    .btn-danger { color: var(--danger); border: 1px solid transparent; background: transparent; padding: 0.4rem 0.75rem; font-size: 0.8rem; }
+    .btn-danger:hover { background: var(--danger-dim); border-color: var(--danger); }
+    .btn-icon { padding: 0.4rem; border-radius: var(--radius); display: inline-flex; align-items: center; justify-content: center; }
+    .btn-icon:hover { background: var(--bg-3); }
+
+    /* HOME */
+    .home-wrap { max-width: 1000px; margin: 0 auto; padding: 3rem 2rem; }
+    .home-hero { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 2.5rem; gap: 1rem; flex-wrap: wrap; border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
+    .home-hero-title { font-family: var(--font-display); font-weight: 700; font-size: clamp(1.5rem, 3vw, 2.5rem); text-transform: uppercase; line-height: 1; letter-spacing: 0.02em; }
+    .home-hero-title em { font-style: normal; color: var(--text-dim); }
+    .home-hero-sub { color: var(--text-dim); font-size: 0.75rem; margin-top: 0.5rem; text-transform: uppercase; }
+
+    .brackets-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+    .bracket-card { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; cursor: pointer; transition: border-color var(--transition); position: relative; }
+    .bracket-card:hover { border-color: var(--text); }
+    .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; }
+    .card-name { font-family: var(--font-display); font-weight: 600; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1.2; flex: 1; }
+    .card-actions { display: flex; gap: 0.25rem; position: relative; z-index: 1; }
+    .card-meta { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    
+    .tag-pill, .status-pill { font-size: 0.65rem; font-family: var(--font-mono); font-weight: 700; text-transform: uppercase; padding: 0.2rem 0.5rem; border-radius: var(--radius); border: 1px solid var(--border); }
+    .status-pill.seeding { background: var(--bg-3); color: var(--text); }
+    .status-pill.active { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
+    .status-pill.complete { background: var(--win-glow); color: var(--win); border-color: var(--win); }
+
+    .card-info { display: flex; gap: 1rem; font-size: 0.75rem; color: var(--text-dim); }
+    .card-info span { display: flex; align-items: center; gap: 0.3rem; }
+
+    .empty-state { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: flex-start; padding: 3rem 0; gap: 1rem; }
+    .empty-icon { display: none; }
+    .empty-state h2 { font-family: var(--font-display); font-weight: 600; font-size: 1.2rem; text-transform: uppercase; }
+    .empty-state p { color: var(--text-dim); font-size: 0.85rem; max-width: 400px; }
+
+    /* MODAL */
+    .modal-backdrop { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 200; align-items: center; justify-content: center; padding: 1rem; animation: fadeIn 0.1s ease; }
+    .modal-backdrop.open { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .modal { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; width: 100%; max-width: 420px; }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem; }
+    .modal-title { font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; text-transform: uppercase; }
+    .form-group { margin-bottom: 1rem; }
+    .form-label { display: block; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.4rem; }
+    .participant-select-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
+    .count-btn { padding: 0.5rem; border-radius: var(--radius); border: 1px solid var(--border); background: var(--bg-3); color: var(--text-dim); font-weight: 600; font-size: 0.9rem; transition: all var(--transition); }
+    .count-btn:hover { border-color: var(--text); color: var(--text); }
+    .count-btn.selected { border-color: var(--text); background: var(--text); color: var(--bg); }
+    .modal-footer { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1.5rem; }
+
+    /* EDITOR */
+    .editor-wrap { display: flex; flex-direction: column; min-height: calc(100dvh - 50px); }
+    .editor-bar { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 2rem; border-bottom: 1px solid var(--border); background: var(--bg); flex-wrap: wrap; gap: 1rem; }
+    .editor-bar-left { display: flex; align-items: center; gap: 1rem; }
+    .editor-title { font-family: var(--font-display); font-weight: 700; font-size: 1.2rem; text-transform: uppercase; }
+    .editor-tag { font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-dim); border: 1px solid var(--border); padding: 0.15rem 0.4rem; border-radius: var(--radius); text-transform: uppercase; }
+    .editor-bar-right { display: flex; align-items: center; gap: 0.75rem; }
+
+    .phase-track { display: flex; align-items: center; gap: 0.5rem; }
+    .phase-step { font-weight: 700; font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim); }
+    .phase-step.active { color: var(--text); text-decoration: underline; text-underline-offset: 4px; }
+    .phase-step.done { color: var(--text-dim); text-decoration: line-through; }
+
+    /* CANVAS */
+    .bracket-canvas-wrap { flex: 1; overflow: auto; padding: 2rem; display: flex; align-items: flex-start; }
+    .bracket-canvas { display: flex; align-items: stretch; gap: 0; min-width: max-content; }
+    .round-col { display: flex; flex-direction: column; position: relative; }
+    .round-header { font-family: var(--font-display); font-weight: 700; font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim); text-align: left; padding: 0 0.5rem 0.5rem; border-bottom: 1px solid var(--border); margin: 0 0.5rem 1rem; }
+    .round-matches { display: flex; flex-direction: column; flex: 1; justify-content: space-around; }
+    .round-connector { width: 30px; display: flex; flex-direction: column; justify-content: space-around; flex-shrink: 0; padding-top: 1.8rem; }
+
+    /* MATCH CARD */
+    .match-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); width: 180px; margin: 0 0.5rem; flex-shrink: 0; }
+    .match-slot { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.5rem; cursor: default; min-height: 32px; border-bottom: 1px solid transparent; }
+    .match-slot:first-child { border-bottom: 1px solid var(--border); }
+    .match-slot.can-pick { cursor: pointer; }
+    .match-slot.can-pick:hover { background: var(--bg-2); }
+    .match-slot.winner { background: var(--bg-2); border-left: 3px solid var(--win); margin-left: -1px; padding-left: calc(0.5rem - 2px); }
+    .match-slot.winner .slot-name { color: var(--win); font-weight: 700; }
+    .match-slot.winner .slot-seed { color: var(--win); opacity: 1; }
+    .match-slot.eliminated .slot-name { color: var(--text-dim); text-decoration: line-through; }
+    .match-slot.empty { opacity: 0.3; }
+    
+    .slot-seed { font-size: 0.6rem; font-weight: 700; color: var(--text-dim); min-width: 14px; text-align: right; flex-shrink: 0; }
+    .slot-name { font-size: 0.75rem; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
+    .slot-win-icon { display: none; }
+
+    .seed-input { background: transparent; border: none; font-size: 0.75rem; padding: 0; border-radius: 0; }
+    .seed-input:focus { color: var(--text); background: var(--bg-3); padding-left: 0.25rem; }
+
+    /* CHAMPION */
+    .champion-col { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 1.5rem; min-width: 160px; }
+    .champion-label { font-weight: 700; font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.25rem; width: 100%; text-align: center; }
+    .champion-card { background: var(--bg); border: 2px solid var(--win); border-radius: var(--radius); padding: 1rem; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 0.25rem; min-width: 140px; }
+    .champion-trophy { display: none; }
+    .champion-name { font-family: var(--font-display); font-weight: 700; font-size: 1rem; text-transform: uppercase; color: var(--win); word-break: break-word; }
+    .champion-sub { font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; }
+
+    /* SEEDING BOTTOM BAR */
+    .seeding-hint { background: var(--bg); border-top: 1px solid var(--border); padding: 0.75rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+    .seeding-hint-text { font-size: 0.75rem; color: var(--text-dim); }
+    .seeding-actions { display: flex; gap: 0.5rem; align-items: center; }
+    
+    .seed-progress-wrap { flex: 1; max-width: 150px; }
+    .seed-progress-label { display: flex; justify-content: space-between; font-size: 0.65rem; margin-bottom: 0.2rem; }
+    .seed-progress-bar { height: 2px; background: var(--border); }
+    .seed-progress-fill { height: 100%; background: var(--text); transition: width 0.2s; }
+
+    /* COMPLETE BANNER */
+    .complete-banner { display: none; background: var(--bg-2); border-bottom: 1px solid var(--win); padding: 0.5rem 2rem; align-items: center; justify-content: space-between; }
+    .complete-banner.visible { display: flex; }
+    .complete-banner-text { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--win); }
+    .complete-banner-actions { display: flex; gap: 0.5rem; }
+
+    /* SVG CONNECTORS */
+    .bracket-svg-layer { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
+    .connector-line { fill: none; stroke: var(--border); stroke-width: 1px; }
+    .connector-line.active-path { stroke: var(--win); stroke-width: 1px; }
+
+    /* CONFIRM DIALOG */
+    .confirm-dialog { max-width: 380px; }
+    .confirm-dialog p { font-size: 0.8rem; margin: 0.5rem 0 1rem; }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border-hi); }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+
+    .hidden { display: none !important; }
+    
+    @media (max-width: 640px) {
+      .app-header { padding: 0 1rem; }
+      .home-wrap { padding: 1.5rem 1rem; }
+      .editor-bar { padding: 0.5rem 1rem; }
+      .bracket-canvas-wrap { padding: 1rem; }
+      .seeding-hint { padding: 0.5rem 1rem; }
+      .complete-banner { padding: 0.5rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════════════════════
+       GLOBAL HEADER
+  ══════════════════════════════════════════════════════════ -->
+  <header class="app-header" role="banner">
+    <div class="logo" id="logo-home-btn" role="button" tabindex="0" aria-label="Go to dashboard">
+      <span class="logo-bracket">[</span>BRACKET<span class="logo-bracket">]</span>HQ
+      <span class="logo-dot" aria-hidden="true"></span>
+    </div>
+    <div id="header-actions">
+      <!-- injected per-page -->
+    </div>
+  </header>
+
+  <!-- ══════════════════════════════════════════════════════════
+       PAGE: HOME
+  ══════════════════════════════════════════════════════════ -->
+  <main id="page-home" class="page active" role="main">
+    <div class="home-wrap">
+      <div class="home-hero">
+        <div>
+          <h1 class="home-hero-title">Your<br/><em>Brackets.</em></h1>
+          <p class="home-hero-sub">// COMPETITION TREES · ZERO TELEMETRY · LOCAL EXECUTION</p>
+        </div>
+        <button class="btn btn-primary" id="btn-new-bracket" aria-label="Create new bracket">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          New Bracket
+        </button>
+      </div>
+      <div class="brackets-grid" id="brackets-grid" role="list" aria-label="Saved brackets">
+        <!-- populated by JS -->
+      </div>
+    </div>
+  </main>
+
+  <!-- ══════════════════════════════════════════════════════════
+       PAGE: BRACKET EDITOR
+  ══════════════════════════════════════════════════════════ -->
+  <div id="page-editor" class="page">
+    <div class="editor-wrap">
+      <!-- top bar -->
+      <div class="editor-bar">
+        <div class="editor-bar-left">
+          <button class="btn btn-ghost" id="btn-back-home" aria-label="Back to dashboard">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M9 2L3 7l6 5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Back
+          </button>
+          <div>
+            <div class="editor-title" id="editor-title">—</div>
+            <div class="editor-tag" id="editor-tag" style="display:none;"></div>
+          </div>
+        </div>
+        <div class="editor-bar-right">
+          <div class="phase-track" role="navigation" aria-label="Phase progress">
+            <div class="phase-step" id="phase-seeding" aria-label="Seeding phase">Seeding</div>
+            <div class="phase-step" id="phase-active"  aria-label="Active phase">Active</div>
+            <div class="phase-step" id="phase-complete" aria-label="Complete phase">Complete</div>
+          </div>
+          <div id="editor-header-actions"></div>
+        </div>
+      </div>
+
+      <!-- complete banner -->
+      <div class="complete-banner" id="complete-banner" role="status" aria-live="polite">
+        <div class="complete-banner-text">
+          🏆 Tournament Complete!
+        </div>
+        <div class="complete-banner-actions">
+          <button class="btn btn-ghost" id="btn-reset-bracket">Reset Bracket</button>
+          <button class="btn btn-ghost" id="btn-complete-home">Back to Dashboard</button>
+        </div>
+      </div>
+
+      <!-- bracket canvas -->
+      <div class="bracket-canvas-wrap" id="bracket-canvas-wrap" aria-label="Bracket visualisation">
+        <div class="bracket-canvas" id="bracket-canvas">
+          <!-- populated by JS -->
+        </div>
+      </div>
+
+      <!-- seeding bottom bar -->
+      <div class="seeding-hint" id="seeding-hint">
+        <div class="seeding-hint-text">
+          <strong>Seeding Phase</strong> — type participant names into the slots below.
+        </div>
+        <div class="seed-progress-wrap">
+          <div class="seed-progress-label">
+            <span>Seeds filled</span>
+            <span id="seed-progress-label-val">0 / 0</span>
+          </div>
+          <div class="seed-progress-bar">
+            <div class="seed-progress-fill" id="seed-progress-fill" style="width:0%"></div>
+          </div>
+        </div>
+        <div class="seeding-actions">
+          <button class="btn btn-ghost" id="btn-randomize" title="Randomize seed order">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2 18h1.4c1.2 0 2.3-.6 2.9-1.6L12 8l5.7 8.4c.6 1 1.7 1.6 2.9 1.6H22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M2 6h1.4c1.2 0 2.3.6 2.9 1.6L8 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M22 6h-1.4c-1.2 0-2.3.6-2.9 1.6L16 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Randomize
+          </button>
+          <button class="btn btn-primary" id="btn-start-bracket">
+            Start Bracket →
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       MODAL: CREATE BRACKET
+  ══════════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" id="create-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title-create">
+    <div class="modal" role="document">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-title-create">New Bracket</h2>
+        <button class="btn-icon btn-ghost" id="btn-close-create-modal" aria-label="Close modal">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 2l12 12M14 2L2 14" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="input-bracket-name">Bracket Name</label>
+        <input type="text" id="input-bracket-name" placeholder="e.g. March Madness 2026" maxlength="60" autocomplete="off" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Participants</label>
+        <div class="participant-select-grid" role="group" aria-label="Select number of participants">
+          <button class="count-btn" data-count="4"  aria-label="4 participants">4</button>
+          <button class="count-btn selected" data-count="8"  aria-label="8 participants">8</button>
+          <button class="count-btn" data-count="16" aria-label="16 participants">16</button>
+          <button class="count-btn" data-count="32" aria-label="32 participants">32</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="input-bracket-tag">Sport / Category <span style="opacity:.5">(optional)</span></label>
+        <input type="text" id="input-bracket-tag" placeholder="e.g. Basketball, Coding, Chess…" maxlength="30" autocomplete="off" />
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="btn-cancel-create">Cancel</button>
+        <button class="btn btn-primary" id="btn-confirm-create">Create Bracket →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       MODAL: CONFIRM DELETE
+  ══════════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" id="delete-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title-delete">
+    <div class="modal confirm-dialog" role="document">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-title-delete">Delete Bracket?</h2>
+        <button class="btn-icon btn-ghost" id="btn-close-delete-modal" aria-label="Close modal">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 2l12 12M14 2L2 14" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <p id="delete-modal-text">This action cannot be undone.</p>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="btn-cancel-delete">Keep It</button>
+        <button class="btn btn-danger" id="btn-confirm-delete" style="padding:.55rem 1.25rem;">Delete Forever</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       APPLICATION JAVASCRIPT
+  ══════════════════════════════════════════════════════════ -->
+  <script>
+  /* ============================================================
+     STORAGE
+  ============================================================ */
+  const STORAGE_KEY = 'bracketHQ_brackets';
+
+  function loadBrackets() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+    catch { return []; }
+  }
+
+  function saveBrackets(brackets) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(brackets));
+  }
+
+  function getBracket(id) {
+    return loadBrackets().find(b => b.id === id) || null;
+  }
+
+  function upsertBracket(bracket) {
+    const brackets = loadBrackets();
+    const idx = brackets.findIndex(b => b.id === bracket.id);
+    if (idx === -1) brackets.push(bracket);
+    else brackets[idx] = bracket;
+    saveBrackets(brackets);
+  }
+
+  function deleteBracket(id) {
+    saveBrackets(loadBrackets().filter(b => b.id !== id));
+  }
+
+  /* ============================================================
+     BRACKET DATA MODEL
+  ============================================================ */
+  function createBracket(name, count, tag) {
+    const id = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36);
+    const participants = Array.from({ length: count }, (_, i) => ({ id: i, name: '' }));
+    return {
+      id,
+      name: name.trim(),
+      tag: tag.trim(),
+      createdAt: new Date().toISOString(),
+      status: 'seeding',
+      participants,        // [{id, name}]
+      rounds: [],          // 2D: rounds[roundIdx][matchIdx] = { p1Id, p2Id, winnerId }
+    };
+  }
+
+  /**
+   * Generate standard seeding pairings: 1v(n), 2v(n-1), …
+   * Works for any power-of-two count.
+   */
+  function generateRound1(participantIds) {
+    const n = participantIds.length;
+    const matches = [];
+    for (let i = 0; i < n / 2; i++) {
+      matches.push({
+        p1Id: participantIds[i],
+        p2Id: participantIds[n - 1 - i],
+        winnerId: null,
+      });
+    }
+    return matches;
+  }
+
+  function buildInitialRounds(bracket) {
+    const ids = bracket.participants.map(p => p.id);
+    const round1 = generateRound1(ids);
+    const totalRounds = Math.log2(bracket.participants.length);
+    const rounds = [round1];
+    // pre-fill subsequent rounds as empty shells
+    for (let r = 1; r < totalRounds; r++) {
+      const prevMatches = rounds[r - 1].length;
+      const nextMatches = prevMatches / 2;
+      rounds.push(Array.from({ length: nextMatches }, () => ({
+        p1Id: null, p2Id: null, winnerId: null
+      })));
+    }
+    return rounds;
+  }
+
+  function startBracket(bracket) {
+    bracket.status = 'active';
+    bracket.rounds = buildInitialRounds(bracket);
+    return bracket;
+  }
+
+  /**
+   * After a winner is picked in match (roundIdx, matchIdx),
+   * advance them to the next round.
+   */
+  function advanceWinner(bracket, roundIdx, matchIdx, winnerId) {
+    bracket.rounds[roundIdx][matchIdx].winnerId = winnerId;
+
+    const nextRound = roundIdx + 1;
+    if (nextRound >= bracket.rounds.length) {
+      // Final resolved → complete
+      bracket.status = 'complete';
+      return bracket;
+    }
+
+    // Place winner into next-round match
+    const nextMatchIdx = Math.floor(matchIdx / 2);
+    const isP1 = matchIdx % 2 === 0;
+    if (isP1) {
+      bracket.rounds[nextRound][nextMatchIdx].p1Id = winnerId;
+    } else {
+      bracket.rounds[nextRound][nextMatchIdx].p2Id = winnerId;
+    }
+    return bracket;
+  }
+
+  function getChampion(bracket) {
+    const lastRound = bracket.rounds[bracket.rounds.length - 1];
+    if (!lastRound || lastRound.length !== 1) return null;
+    const finalMatch = lastRound[0];
+    if (finalMatch.winnerId == null) return null;
+    return bracket.participants.find(p => p.id === finalMatch.winnerId) || null;
+  }
+
+  function resetBracket(bracket) {
+    bracket.status = 'seeding';
+    bracket.rounds = [];
+    return bracket;
+  }
+
+  /* ============================================================
+     ROUTER / PAGE SWITCHER
+  ============================================================ */
+  let currentPage = 'home';
+  let currentBracketId = null;
+
+  function showPage(page) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(`page-${page}`).classList.add('active');
+    currentPage = page;
+    renderHeaderActions();
+  }
+
+  function renderHeaderActions() {
+    const el = document.getElementById('header-actions');
+    if (currentPage === 'home') {
+      el.innerHTML = '';
+    } else {
+      el.innerHTML = '';
+    }
+  }
+
+  /* ============================================================
+     HOME PAGE
+  ============================================================ */
+  function renderHome() {
+    showPage('home');
+    const grid = document.getElementById('brackets-grid');
+    const brackets = loadBrackets();
+
+    if (brackets.length === 0) {
+      grid.innerHTML = `
+        <div class="empty-state" role="listitem">
+          <div class="empty-icon" aria-hidden="true">
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><rect x="2" y="8" width="10" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/><rect x="2" y="20" width="10" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/><rect x="14" y="14" width="10" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/><rect x="26" y="14" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/><line x1="12" y1="12" x2="14" y2="14" stroke="currentColor" stroke-width="1.5"/><line x1="12" y1="24" x2="14" y2="22" stroke="currentColor" stroke-width="1.5"/><line x1="24" y1="18" x2="26" y2="18" stroke="currentColor" stroke-width="1.5"/></svg>
+          </div>
+          <h2>No Brackets Yet</h2>
+          <p>Create your first bracket to get started. Single-elimination, fully local — no account needed.</p>
+          <button class="btn btn-primary" onclick="openCreateModal()">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            New Bracket
+          </button>
+        </div>`;
+      return;
+    }
+
+    grid.innerHTML = brackets.map(b => {
+      const created = new Date(b.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      const count = b.participants.length;
+      return `
+        <article class="bracket-card" role="listitem" tabindex="0"
+          data-id="${b.id}"
+          onclick="openEditor('${b.id}')"
+          onkeydown="if(event.key==='Enter'||event.key===' ')openEditor('${b.id}')"
+          aria-label="Open ${escHtml(b.name)} bracket">
+          <div class="card-top">
+            <div class="card-name">${escHtml(b.name)}</div>
+            <div class="card-actions">
+              <button class="btn-icon btn-danger" onclick="event.stopPropagation();confirmDelete('${b.id}')" aria-label="Delete ${escHtml(b.name)}">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 3h12M5 3V2h4v1M2 3l1 9h8l1-9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="card-meta">
+            <span class="status-pill ${b.status}">${b.status === 'seeding' ? 'Seeding' : b.status === 'active' ? 'In Progress' : '✓ Complete'}</span>
+            ${b.tag ? `<span class="tag-pill">${escHtml(b.tag)}</span>` : ''}
+          </div>
+          <div class="card-info">
+            <span>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.2"/><circle cx="6" cy="6" r="1.5" fill="currentColor"/></svg>
+              ${count} participants
+            </span>
+            <span>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><rect x="1" y="2" width="10" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 1v2M8 1v2M1 5h10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+              ${created}
+            </span>
+          </div>
+        </article>`;
+    }).join('');
+  }
+
+  /* ============================================================
+     CREATE MODAL
+  ============================================================ */
+  let selectedCount = 8;
+
+  function openCreateModal() {
+    selectedCount = 8;
+    document.getElementById('input-bracket-name').value = '';
+    document.getElementById('input-bracket-tag').value = '';
+    updateCountBtns();
+    document.getElementById('create-modal').classList.add('open');
+    setTimeout(() => document.getElementById('input-bracket-name').focus(), 100);
+  }
+
+  function closeCreateModal() {
+    document.getElementById('create-modal').classList.remove('open');
+  }
+
+  function updateCountBtns() {
+    document.querySelectorAll('.count-btn').forEach(btn => {
+      btn.classList.toggle('selected', parseInt(btn.dataset.count) === selectedCount);
+      btn.setAttribute('aria-pressed', parseInt(btn.dataset.count) === selectedCount);
+    });
+  }
+
+  document.querySelectorAll('.count-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedCount = parseInt(btn.dataset.count);
+      updateCountBtns();
+    });
+  });
+
+  document.getElementById('btn-new-bracket').addEventListener('click', openCreateModal);
+  document.getElementById('btn-close-create-modal').addEventListener('click', closeCreateModal);
+  document.getElementById('btn-cancel-create').addEventListener('click', closeCreateModal);
+
+  document.getElementById('btn-confirm-create').addEventListener('click', () => {
+    const name = document.getElementById('input-bracket-name').value.trim();
+    if (!name) {
+      document.getElementById('input-bracket-name').focus();
+      document.getElementById('input-bracket-name').style.borderColor = 'var(--danger)';
+      setTimeout(() => document.getElementById('input-bracket-name').style.borderColor = '', 1500);
+      return;
+    }
+    const tag = document.getElementById('input-bracket-tag').value.trim();
+    const bracket = createBracket(name, selectedCount, tag);
+    upsertBracket(bracket);
+    closeCreateModal();
+    openEditor(bracket.id);
+  });
+
+  // Close on backdrop click
+  document.getElementById('create-modal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeCreateModal();
+  });
+
+  // Enter key to submit
+  document.getElementById('input-bracket-name').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('btn-confirm-create').click();
+  });
+
+  /* ============================================================
+     DELETE MODAL
+  ============================================================ */
+  let pendingDeleteId = null;
+
+  function confirmDelete(id) {
+    pendingDeleteId = id;
+    const b = getBracket(id);
+    document.getElementById('delete-modal-text').textContent =
+      `"${b ? b.name : 'This bracket'}" will be permanently deleted. This cannot be undone.`;
+    document.getElementById('delete-modal').classList.add('open');
+  }
+
+  function closeDeleteModal() {
+    document.getElementById('delete-modal').classList.remove('open');
+    pendingDeleteId = null;
+  }
+
+  document.getElementById('btn-close-delete-modal').addEventListener('click', closeDeleteModal);
+  document.getElementById('btn-cancel-delete').addEventListener('click', closeDeleteModal);
+  document.getElementById('delete-modal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeDeleteModal();
+  });
+
+  document.getElementById('btn-confirm-delete').addEventListener('click', () => {
+    if (pendingDeleteId) {
+      deleteBracket(pendingDeleteId);
+      closeDeleteModal();
+      renderHome();
+    }
+  });
+
+  /* ============================================================
+     EDITOR
+  ============================================================ */
+  function openEditor(id) {
+    currentBracketId = id;
+    showPage('editor');
+    renderEditor();
+  }
+
+  function renderEditor() {
+    const bracket = getBracket(currentBracketId);
+    if (!bracket) { renderHome(); return; }
+
+    // header info
+    document.getElementById('editor-title').textContent = bracket.name;
+    const tagEl = document.getElementById('editor-tag');
+    if (bracket.tag) { tagEl.textContent = bracket.tag; tagEl.style.display = ''; }
+    else tagEl.style.display = 'none';
+
+    // phase indicators
+    updatePhaseUI(bracket.status);
+
+    // complete banner
+    const banner = document.getElementById('complete-banner');
+    banner.classList.toggle('visible', bracket.status === 'complete');
+
+    // seeding hint bar
+    document.getElementById('seeding-hint').style.display =
+      bracket.status === 'seeding' ? '' : 'none';
+
+    // render the canvas
+    renderBracketCanvas(bracket);
+  }
+
+  function updatePhaseUI(status) {
+    const steps = ['seeding', 'active', 'complete'];
+    const statusMap = { seeding: 0, active: 1, complete: 2 };
+    const current = statusMap[status] ?? 0;
+    steps.forEach((s, i) => {
+      const el = document.getElementById(`phase-${s}`);
+      el.classList.remove('active', 'done');
+      if (i === current) el.classList.add('active');
+      else if (i < current) el.classList.add('done');
+    });
+  }
+
+  /* ── BRACKET CANVAS RENDERER ── */
+  function renderBracketCanvas(bracket) {
+    const canvas = document.getElementById('bracket-canvas');
+    canvas.innerHTML = '';
+
+    if (bracket.status === 'seeding') {
+      renderSeedingCanvas(bracket, canvas);
+    } else {
+      renderActiveCanvas(bracket, canvas);
+    }
+  }
+
+  function getParticipantName(bracket, id) {
+    if (id == null) return '';
+    const p = bracket.participants.find(p => p.id === id);
+    return p ? p.name : '';
+  }
+
+  /* ── SEEDING CANVAS ── */
+  function renderSeedingCanvas(bracket, canvas) {
+    const count = bracket.participants.length;
+    const matchCount = count / 2;
+
+    const col = document.createElement('div');
+    col.className = 'round-col';
+    col.innerHTML = `<div class="round-header">Seeding — Fill Names</div>`;
+
+    const matchesWrap = document.createElement('div');
+    matchesWrap.className = 'round-matches';
+    matchesWrap.style.gap = '0.75rem';
+
+    // Standard seeding: 1v8, 2v7, etc.
+    for (let i = 0; i < matchCount; i++) {
+      const topSeed = i + 1;
+      const btmSeed = count - i;
+      const topP = bracket.participants[i];
+      const btmP = bracket.participants[count - 1 - i];
+
+      const card = document.createElement('div');
+      card.className = 'match-card';
+      card.style.margin = '0.25rem 0.5rem';
+      card.innerHTML = `
+        <div class="match-slot" data-pid="${topP.id}" data-match-idx="${i}" data-slot="0">
+          <span class="slot-seed">${topSeed}</span>
+          <input class="seed-input" type="text" placeholder="Enter name…"
+            value="${escHtml(topP.name)}"
+            maxlength="30"
+            data-pid="${topP.id}"
+            aria-label="Seed ${topSeed} participant name" />
+        </div>
+        <div class="match-slot" data-pid="${btmP.id}" data-match-idx="${i}" data-slot="1">
+          <span class="slot-seed">${btmSeed}</span>
+          <input class="seed-input" type="text" placeholder="Enter name…"
+            value="${escHtml(btmP.name)}"
+            maxlength="30"
+            data-pid="${btmP.id}"
+            aria-label="Seed ${btmSeed} participant name" />
+        </div>`;
+      matchesWrap.appendChild(card);
+    }
+
+    col.appendChild(matchesWrap);
+    canvas.appendChild(col);
+
+    // Attach input listeners
+    canvas.querySelectorAll('.seed-input').forEach(input => {
+      input.addEventListener('input', () => {
+        const bid = currentBracketId;
+        const pid = parseInt(input.dataset.pid);
+        const b = getBracket(bid);
+        const p = b.participants.find(pp => pp.id === pid);
+        if (p) p.name = input.value;
+        upsertBracket(b);
+        updateSeedProgress(b);
+      });
+    });
+
+    updateSeedProgress(bracket);
+  }
+
+  function updateSeedProgress(bracket) {
+    const filled = bracket.participants.filter(p => p.name.trim()).length;
+    const total = bracket.participants.length;
+    const pct = total ? (filled / total) * 100 : 0;
+    document.getElementById('seed-progress-fill').style.width = `${pct}%`;
+    document.getElementById('seed-progress-label-val').textContent = `${filled} / ${total}`;
+  }
+
+  /* ── ACTIVE/COMPLETE CANVAS ── */
+  function renderActiveCanvas(bracket, canvas) {
+    const totalRounds = bracket.rounds.length;
+    const champion = getChampion(bracket);
+
+    // Render each round as a column
+    for (let r = 0; r < totalRounds; r++) {
+      const roundMatches = bracket.rounds[r];
+      const col = document.createElement('div');
+      col.className = 'round-col';
+
+      const roundName = getRoundName(r, totalRounds);
+      col.innerHTML = `<div class="round-header">${roundName}</div>`;
+
+      const matchesWrap = document.createElement('div');
+      matchesWrap.className = 'round-matches';
+      matchesWrap.style.gap = '0';
+
+      roundMatches.forEach((match, mIdx) => {
+        const matchEl = buildMatchCard(bracket, match, r, mIdx);
+        const wrapper = document.createElement('div');
+        wrapper.style.flex = '1';
+        wrapper.style.display = 'flex';
+        wrapper.style.alignItems = 'center';
+        wrapper.style.justifyContent = 'center';
+        wrapper.appendChild(matchEl);
+        matchesWrap.appendChild(wrapper);
+      });
+
+      col.appendChild(matchesWrap);
+      canvas.appendChild(col);
+
+      // Add SVG connector between rounds (not after last round)
+      if (r < totalRounds - 1) {
+        canvas.appendChild(buildConnectorCol(roundMatches.length, r, totalRounds));
+      }
+    }
+
+    // Champion column
+    if (champion) {
+      const champCol = document.createElement('div');
+      champCol.className = 'champion-col';
+      champCol.innerHTML = `
+        <div class="champion-label">Champion</div>
+        <div class="champion-card" role="status" aria-live="polite">
+          <div class="champion-trophy" aria-hidden="true">🏆</div>
+          <div class="champion-name">${escHtml(champion.name)}</div>
+          <div class="champion-sub">Winner</div>
+        </div>`;
+      canvas.appendChild(champCol);
+    } else {
+      // Show pending champion placeholder
+      const champCol = document.createElement('div');
+      champCol.className = 'champion-col';
+      champCol.innerHTML = `
+        <div class="champion-label">Champion</div>
+        <div class="champion-card" style="opacity:0.35;border-color:var(--border);box-shadow:none;">
+          <div class="champion-trophy" aria-hidden="true">?</div>
+          <div class="champion-name" style="color:var(--text-dim)">TBD</div>
+          <div class="champion-sub">Pick winners to advance</div>
+        </div>`;
+      canvas.appendChild(champCol);
+    }
+
+    // Draw SVG connector lines after layout
+    requestAnimationFrame(() => drawConnectors(canvas, bracket));
+  }
+
+  function buildMatchCard(bracket, match, roundIdx, matchIdx) {
+    const card = document.createElement('div');
+    card.className = 'match-card';
+    card.id = `match-${roundIdx}-${matchIdx}`;
+    card.style.margin = '0.35rem 0.5rem';
+
+    [match.p1Id, match.p2Id].forEach((pid, slotIdx) => {
+      const name = getParticipantName(bracket, pid);
+      const isWinner = match.winnerId === pid && pid != null;
+      const isLoser = match.winnerId != null && match.winnerId !== pid && pid != null;
+      const isEmpty = pid == null;
+      const canPick = bracket.status === 'active' && match.winnerId == null && pid != null && name.trim();
+
+      const slot = document.createElement('div');
+      slot.className = 'match-slot';
+      let seedNum = '';
+      if (roundIdx === 0 && pid != null) {
+        const pIdx = bracket.participants.findIndex(p => p.id === pid);
+        seedNum = pIdx !== -1 ? (slotIdx === 0 ? pIdx + 1 : bracket.participants.length - pIdx) : '';
+        // For slot idx 1 in seeding, derive correct seed
+        // Actually: p1Id is always the lower seed number in round 0
+        // participant array is ordered by seed, so:
+        if (slotIdx === 0) seedNum = bracket.participants.findIndex(p => p.id === pid) + 1;
+        else {
+          // top of match is i, bottom is count-1-i
+          const pI = bracket.participants.findIndex(p => p.id === pid);
+          seedNum = pI + 1;
+        }
+      }
+
+      if (isWinner) slot.classList.add('winner');
+      if (isLoser) slot.classList.add('eliminated');
+      if (isEmpty) slot.classList.add('empty');
+      if (canPick) slot.classList.add('can-pick');
+
+      slot.innerHTML = `
+        <span class="slot-seed">${seedNum || ''}</span>
+        <span class="slot-name">${isEmpty ? '—' : (name || '<em style="color:var(--text-dim);font-style:italic">unnamed</em>')}</span>
+        <svg class="slot-win-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3 8l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>`;
+
+      if (canPick) {
+        slot.setAttribute('role', 'button');
+        slot.setAttribute('tabindex', '0');
+        slot.setAttribute('aria-label', `Pick ${name} as winner`);
+        slot.addEventListener('click', () => pickWinner(roundIdx, matchIdx, pid));
+        slot.addEventListener('keydown', e => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pickWinner(roundIdx, matchIdx, pid); }
+        });
+      }
+
+      card.appendChild(slot);
+    });
+
+    return card;
+  }
+
+  function pickWinner(roundIdx, matchIdx, winnerId) {
+    let bracket = getBracket(currentBracketId);
+    bracket = advanceWinner(bracket, roundIdx, matchIdx, winnerId);
+    upsertBracket(bracket);
+    renderEditor(); // full re-render for simplicity
+  }
+
+  function getRoundName(roundIdx, totalRounds) {
+    const remaining = totalRounds - roundIdx;
+    if (remaining === 1) return 'Final';
+    if (remaining === 2) return 'Semi-Finals';
+    if (remaining === 3) return 'Quarter-Finals';
+    return `Round ${roundIdx + 1}`;
+  }
+
+  /* ── CONNECTOR LINES (SVG) ── */
+  function buildConnectorCol(matchCount, roundIdx, totalRounds) {
+    const div = document.createElement('div');
+    div.className = 'round-connector';
+    div.id = `connector-${roundIdx}`;
+    div.style.position = 'relative';
+    return div;
+  }
+
+  function drawConnectors(canvas, bracket) {
+    // Remove old SVGs
+    canvas.querySelectorAll('.bracket-svg').forEach(s => s.remove());
+
+    const totalRounds = bracket.rounds.length;
+
+    for (let r = 0; r < totalRounds - 1; r++) {
+      const connectorCol = document.getElementById(`connector-${r}`);
+      if (!connectorCol) continue;
+
+      const colRect = connectorCol.getBoundingClientRect();
+      const canvasRect = canvas.getBoundingClientRect();
+      const matches = bracket.rounds[r];
+      const nextMatches = bracket.rounds[r + 1];
+
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.classList.add('bracket-svg');
+      svg.style.cssText = `position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;`;
+      connectorCol.appendChild(svg);
+
+      // For each pair of current-round matches → one next-round match
+      for (let m = 0; m < matches.length; m += 2) {
+        const topMatchEl = document.getElementById(`match-${r}-${m}`);
+        const btmMatchEl = document.getElementById(`match-${r}-${Math.min(m+1, matches.length-1)}`);
+        const nextMatchEl = document.getElementById(`match-${r+1}-${Math.floor(m/2)}`);
+
+        if (!topMatchEl || !btmMatchEl || !nextMatchEl) continue;
+
+        const topRect = topMatchEl.getBoundingClientRect();
+        const btmRect = btmMatchEl.getBoundingClientRect();
+        const nxtRect = nextMatchEl.getBoundingClientRect();
+
+        // right edge of current match cards → left edge of connector col
+        const x0 = topRect.right - colRect.left;
+        const xMid = colRect.width / 2;
+        const xEnd = nxtRect.left - colRect.left;
+
+        const y1 = topRect.top + topRect.height / 2 - colRect.top;
+        const y2 = btmRect.top + btmRect.height / 2 - colRect.top;
+        const yMid = (y1 + y2) / 2;
+
+        // Determine if these are winning paths
+        const topWon = matches[m]?.winnerId != null;
+        const btmWon = matches[Math.min(m+1, matches.length-1)]?.winnerId != null;
+        const nextExists = nextMatches[Math.floor(m/2)]?.p1Id != null || nextMatches[Math.floor(m/2)]?.p2Id != null;
+
+        const cssVar = topWon || btmWon ? 'var(--win)' : 'var(--border)';
+        const glow = 'none';
+        const sw = topWon || btmWon ? '1.5' : '1';
+
+        // top line: match → midpoint vertical
+        makePath(svg, `M ${x0} ${y1} H ${xMid}`, cssVar, sw, glow, topWon);
+        // bottom line
+        makePath(svg, `M ${x0} ${y2} H ${xMid}`, cssVar, sw, glow, btmWon);
+        // vertical bridge
+        makePath(svg, `M ${xMid} ${y1} V ${y2}`, cssVar, sw, glow, topWon && btmWon);
+        // exit to next round
+        makePath(svg, `M ${xMid} ${yMid} H ${xEnd}`, cssVar, sw, glow, nextExists);
+      }
+    }
+  }
+
+  function makePath(svg, d, stroke, strokeWidth, filter, active) {
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', d);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', active ? 'var(--win)' : stroke);
+    path.setAttribute('stroke-width', strokeWidth);
+    path.setAttribute('stroke-linecap', 'square');
+    if (active && filter !== 'none') path.style.filter = filter;
+    svg.appendChild(path);
+  }
+
+  /* ── SEEDING CONTROLS ── */
+  document.getElementById('btn-randomize').addEventListener('click', () => {
+    const b = getBracket(currentBracketId);
+    // Fisher-Yates shuffle on participants array
+    for (let i = b.participants.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [b.participants[i], b.participants[j]] = [b.participants[j], b.participants[i]];
+    }
+    upsertBracket(b);
+    renderEditor();
+  });
+
+  document.getElementById('btn-start-bracket').addEventListener('click', () => {
+    let b = getBracket(currentBracketId);
+    // Fill empty names with defaults
+    b.participants.forEach((p, i) => {
+      if (!p.name.trim()) p.name = `Participant ${i + 1}`;
+    });
+    b = startBracket(b);
+    upsertBracket(b);
+    renderEditor();
+  });
+
+  /* ── BACK / NAVIGATION ── */
+  document.getElementById('btn-back-home').addEventListener('click', () => {
+    currentBracketId = null;
+    renderHome();
+  });
+
+  document.getElementById('btn-complete-home').addEventListener('click', () => {
+    currentBracketId = null;
+    renderHome();
+  });
+
+  document.getElementById('logo-home-btn').addEventListener('click', () => {
+    if (currentPage === 'home') return;
+    currentBracketId = null;
+    renderHome();
+  });
+  document.getElementById('logo-home-btn').addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); document.getElementById('logo-home-btn').click(); }
+  });
+
+  /* ── RESET ── */
+  document.getElementById('btn-reset-bracket').addEventListener('click', () => {
+    let b = getBracket(currentBracketId);
+    b = resetBracket(b);
+    // clear participant names? — no, keep them, just reset rounds
+    upsertBracket(b);
+    renderEditor();
+  });
+
+  /* ============================================================
+     UTILS
+  ============================================================ */
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  /* ============================================================
+     KEYBOARD: ESC closes modals
+  ============================================================ */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      closeCreateModal();
+      closeDeleteModal();
+    }
+  });
+
+  /* ============================================================
+     INIT
+  ============================================================ */
+  renderHome();
+  </script>
+</body>
+</html>
