@@ -2202,6 +2202,44 @@
     });
 
     /* ============================================================
+       DRAG TO PAN
+    ============================================================ */
+    const canvasWrap = document.getElementById('bracket-canvas-wrap');
+    let isDown = false;
+    let startX;
+    let startY;
+    let scrollLeft;
+    let scrollTop;
+
+    canvasWrap.addEventListener('mousedown', (e) => {
+      if (e.target.closest('button, input, select, .match-card, .champion-card, .round-header')) return;
+      isDown = true;
+      canvasWrap.style.cursor = 'grabbing';
+      startX = e.pageX - canvasWrap.offsetLeft;
+      startY = e.pageY - canvasWrap.offsetTop;
+      scrollLeft = canvasWrap.scrollLeft;
+      scrollTop = canvasWrap.scrollTop;
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (isDown) {
+        isDown = false;
+        canvasWrap.style.cursor = '';
+      }
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - canvasWrap.offsetLeft;
+      const y = e.pageY - canvasWrap.offsetTop;
+      const walkX = (x - startX); // Adjust multiplier if needed
+      const walkY = (y - startY);
+      canvasWrap.scrollLeft = scrollLeft - walkX;
+      canvasWrap.scrollTop = scrollTop - walkY;
+    });
+
+    /* ============================================================
        INIT
     ============================================================ */
     renderHome();
