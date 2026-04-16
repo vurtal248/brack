@@ -18,25 +18,25 @@
     ============================================================ */
     :root {
       color-scheme: light dark;
-      --bg: light-dark(oklch(0.98 0 0), oklch(0.1 0 0));
-      --bg-2: light-dark(oklch(1 0 0), oklch(0.13 0 0));
-      --bg-3: light-dark(oklch(0.95 0 0), oklch(0.18 0 0));
-      --border: light-dark(oklch(0.85 0 0), oklch(0.25 0 0));
-      --border-hi: light-dark(oklch(0.7 0 0), oklch(0.35 0 0));
-      --text: light-dark(oklch(0.2 0 0), oklch(0.9 0 0));
-      --text-dim: light-dark(oklch(0.45 0 0), oklch(0.6 0 0));
-      --accent: light-dark(oklch(0.3 0 0), oklch(0.8 0 0));
-      --accent-dim: light-dark(oklch(0.93 0 0), oklch(0.2 0 0));
-      --win: light-dark(oklch(0.15 0 0), oklch(0.95 0 0));
-      --win-glow: light-dark(oklch(0.92 0 0), oklch(0.25 0 0));
+      --bg: light-dark(oklch(0.98 0.01 250), oklch(0.1 0.01 250));
+      --bg-2: light-dark(oklch(1 0.005 250), oklch(0.13 0.01 250));
+      --bg-3: light-dark(oklch(0.95 0.01 250), oklch(0.18 0.01 250));
+      --border: light-dark(oklch(0.85 0.01 250), oklch(0.25 0.01 250));
+      --border-hi: light-dark(oklch(0.7 0.01 250), oklch(0.35 0.01 250));
+      --text: light-dark(oklch(0.2 0.01 250), oklch(0.9 0.01 250));
+      --text-dim: light-dark(oklch(0.4 0.01 250), oklch(0.65 0.01 250));
+      --accent: light-dark(oklch(0.3 0.01 250), oklch(0.8 0.01 250));
+      --accent-dim: light-dark(oklch(0.93 0.01 250), oklch(0.2 0.01 250));
+      --win: light-dark(oklch(0.15 0.01 250), oklch(0.95 0.01 250));
+      --win-glow: light-dark(oklch(0.92 0.01 250), oklch(0.25 0.01 250));
       --elim-text: var(--text-dim);
-      --danger: light-dark(oklch(0.45 0 0), oklch(0.65 0 0));
-      --danger-dim: light-dark(oklch(0.95 0 0), oklch(0.18 0 0));
+      --danger: light-dark(oklch(0.45 0.02 20), oklch(0.65 0.02 20));
+      --danger-dim: light-dark(oklch(0.95 0.01 20), oklch(0.18 0.01 20));
       --radius: 2px;
       --radius-lg: 4px;
       --font-display: 'Chivo', sans-serif;
       --font-mono: 'Chivo Mono', monospace;
-      --transition: 0.1s linear;
+      --transition: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     *,
@@ -45,6 +45,11 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+    }
+
+    *:focus-visible {
+      outline: 2px solid var(--text);
+      outline-offset: 2px;
     }
 
     html {
@@ -85,7 +90,8 @@
     }
 
     input:focus,
-    select:focus {
+    select:focus,
+    textarea:focus {
       border-color: var(--text);
     }
 
@@ -151,6 +157,10 @@
       border: 1px solid transparent;
     }
 
+    .btn:active, .btn-icon:active {
+      transform: scale(0.97);
+    }
+
     .btn-primary {
       background: var(--text);
       color: var(--bg);
@@ -189,6 +199,8 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      transition: all var(--transition);
+      color: var(--text);
     }
 
     .btn-icon:hover {
@@ -249,12 +261,16 @@
       flex-direction: column;
       gap: 0.75rem;
       cursor: pointer;
-      transition: border-color var(--transition);
+      transition: all var(--transition);
       position: relative;
     }
 
     .bracket-card:hover {
       border-color: var(--text);
+    }
+
+    .bracket-card:active {
+      transform: scale(0.98);
     }
 
     .card-top {
@@ -649,10 +665,16 @@
 
     .match-slot.can-pick {
       cursor: pointer;
+      transition: all var(--transition);
     }
 
     .match-slot.can-pick:hover {
       background: var(--bg-2);
+    }
+
+    .match-slot.can-pick:active {
+      transform: scale(0.98);
+      background: var(--bg-3);
     }
 
     .match-slot.winner {
