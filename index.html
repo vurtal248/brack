@@ -745,6 +745,42 @@
       transform: scale(0.97);
     }
 
+    /* Save-without-winner secondary button */
+    .btn-save-no-winner {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 0.65rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.55rem 0.75rem;
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+
+    .btn-save-no-winner:hover {
+      color: var(--text);
+      border-color: var(--border-hi);
+    }
+
+    .btn-save-no-winner:active {
+      transform: scale(0.97);
+    }
+
+    /* Series-state indicator shown when a winner check is active */
+    .series-status-hint {
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+      text-align: center;
+      margin-top: 0.5rem;
+      min-height: 1em;
+    }
+
 
     .modal-footer {
       display: flex;
@@ -1425,10 +1461,15 @@
           </div>
         </div>
 
+        <!-- Series status hint -->
+        <div class="series-status-hint" id="series-status-hint"></div>
+
         <!-- Footer -->
         <div class="score-submit-footer">
           <button class="btn-reset-scores" id="btn-reset-scores">Reset Scores</button>
-          <button class="btn-submit-scores" id="btn-save-score">Submit Scores</button>
+          <!-- Save without declaring a winner (mid-series) -->
+          <button class="btn-save-no-winner" id="btn-save-no-winner" title="Save scores without declaring a winner yet">Save Only</button>
+          <button class="btn-submit-scores" id="btn-save-score">Declare Winner →</button>
         </div>
       </div>
 
@@ -2402,6 +2443,26 @@
         });
       });
 
+      // Series status hint — shows p1 wins vs p2 wins across all sets
+      (() => {
+        let p1w = 0, p2w = 0;
+        matchSets.forEach(s => {
+          const a = parseFloat(s.p1), b = parseFloat(s.p2);
+          if (!isNaN(a) && !isNaN(b) && (a !== 0 || b !== 0)) {
+            if (a > b) p1w++;
+            else if (b > a) p2w++;
+          }
+        });
+        const hint = document.getElementById('series-status-hint');
+        if (p1w > 0 || p2w > 0) {
+          const p1n = document.getElementById('score-p1-name').textContent || 'P1';
+          const p2n = document.getElementById('score-p2-name').textContent || 'P2';
+          hint.textContent = `Series: ${escHtml(p1n)} ${p1w} – ${p2w} ${escHtml(p2n)}`;
+        } else {
+          hint.textContent = '';
+        }
+      })();
+
       // Stepper buttons
       c.querySelectorAll('.score-stepper-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -2447,6 +2508,22 @@
       });
     }
 
+    // "Save Only" — persist scores without declaring a winner (mid-series support)
+    document.getElementById('btn-save-no-winner').addEventListener('click', () => {
+      if (!currentScoreMatch) return;
+      let bracket = getBracket(currentBracketId);
+      const match = bracket.rounds[currentScoreMatch.r][currentScoreMatch.m];
+
+      // Persist the sets as-is; do NOT touch winnerId or advance anyone
+      const cleanSets = matchSets.map(s => ({ p1: s.p1 !== '' ? parseFloat(s.p1) : 0, p2: s.p2 !== '' ? parseFloat(s.p2) : 0 }));
+      match.sets = cleanSets;
+
+      upsertBracket(bracket);
+      closeScoreModal();
+      renderEditor();
+    });
+
+    // "Declare Winner" — requires a winner to be checked; advances bracket
     document.getElementById('btn-save-score').addEventListener('click', () => {
       if (!currentScoreMatch) return;
       let bracket = getBracket(currentBracketId);
@@ -2461,7 +2538,11 @@
       } else if (document.getElementById('score-p2-radio').checked) {
         winnerId = match.p2Id;
       } else {
-        alert('Cannot save match: No winner selected. Please enter scores or check a participant to win.');
+        // No winner checked — prompt user to either pick a winner or use Save Only
+        const hint = document.getElementById('series-status-hint');
+        hint.textContent = '⚠ Check a winner above, or use Save Only for mid-series.';
+        hint.style.color = 'var(--danger)';
+        setTimeout(() => { hint.style.color = ''; renderSets(); }, 2500);
         return;
       }
 
