@@ -2196,10 +2196,9 @@
         wrapper.style.alignItems = 'center';
         wrapper.style.justifyContent = 'center';
 
-        // Bye match: exactly one slot is null — the other auto-advanced.
-        // Don't render a card; just leave an invisible spacer so the
-        // surrounding flex layout stays vertically balanced.
-        const isBye = (match.p1Id == null) !== (match.p2Id == null);
+        // Bye: only in R1 (r===0) where exactly one slot is null.
+        // Later rounds with one null slot are just waiting for a winner.
+        const isBye = r === 0 && (match.p1Id == null) !== (match.p2Id == null);
         if (isBye) {
           // Invisible spacer — same width as a match card so connectors align
           const spacer = document.createElement('div');
@@ -2643,9 +2642,11 @@
         let topM = bracket.rounds[r][m];
         let btmM = bracket.rounds[r][m + 1] || topM;
 
-        // Detect bye slots: exactly one of p1Id/p2Id is null
-        const topIsBye = topM && (topM.p1Id == null) !== (topM.p2Id == null);
-        const btmIsBye = btmM && (btmM.p1Id == null) !== (btmM.p2Id == null);
+        // Detect bye slots: only in R1 (r===0), exactly one of p1Id/p2Id is null.
+        // In later rounds a single null slot just means a winner hasn't been
+        // decided yet — that is NOT a bye.
+        const topIsBye = r === 0 && topM && (topM.p1Id == null) !== (topM.p2Id == null);
+        const btmIsBye = r === 0 && btmM && (btmM.p1Id == null) !== (btmM.p2Id == null);
 
         const topMatchEl = document.getElementById(`match-${srcPre}-${r}-${m}`);
         const btmMatchEl = document.getElementById(`match-${srcPre}-${r}-${m + 1}`);
