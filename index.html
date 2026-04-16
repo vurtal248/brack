@@ -157,7 +157,8 @@
       border: 1px solid transparent;
     }
 
-    .btn:active, .btn-icon:active {
+    .btn:active,
+    .btn-icon:active {
       transform: scale(0.97);
     }
 
@@ -436,78 +437,312 @@
       margin-bottom: 0.4rem;
     }
 
-    .score-names {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      gap: 1rem;
-      align-items: center;
-      text-align: center;
-      margin-bottom: 1.5rem;
+    /* ── SCORE MODAL TABS ── */
+    .score-modal-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      margin: -2rem -2rem 0;
+      padding: 0 1rem;
+    }
+
+    .score-tab {
       font-family: var(--font-display);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.75rem 1rem;
+      color: var(--text-dim);
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: color var(--transition), border-color var(--transition);
+      margin-bottom: -1px;
+    }
+
+    .score-tab.active {
+      color: var(--text);
+      border-bottom-color: var(--text);
+    }
+
+    .score-tab:hover:not(.active) {
+      color: var(--text);
+    }
+
+    /* ── SCORE TABLE ── */
+    .score-table-header {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 1.25rem;
+      align-items: center;
+      padding: 0.5rem 0.75rem;
+      margin-top: 1.25rem;
+    }
+
+    .score-col-label {
+      font-size: 0.6rem;
       font-weight: 700;
       text-transform: uppercase;
-      font-size: 0.9rem;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+      text-align: center;
     }
 
-    .score-name {
-      padding: 0.5rem;
-      background: var(--bg);
+    .score-col-label.winner-col {
+      width: 52px;
+    }
+
+    .score-col-label.score-col {
+      width: 80px;
+    }
+
+    .score-participant-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 1.25rem;
+      align-items: center;
+      background: var(--bg-3);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      word-break: break-word;
-    }
-
-    .score-participant {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      cursor: pointer;
+      padding: 0.6rem 0.75rem;
+      margin-bottom: 0.5rem;
       transition: border-color var(--transition);
     }
 
-    .score-participant:hover {
-      border-color: var(--text);
+    .score-participant-row.is-winner {
+      border-color: var(--border-hi);
+      background: var(--bg-2);
     }
 
-    .score-name.vs {
+    .score-p-identity {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      min-width: 0;
+    }
+
+    .score-p-seed {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--text);
+      min-width: 1rem;
+      flex-shrink: 0;
+    }
+
+    .score-p-name {
+      font-family: var(--font-display);
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Winner checkmark */
+    .score-winner-cell {
+      width: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .score-winner-check {
+      width: 28px;
+      height: 28px;
+      border: 1.5px solid var(--border-hi);
+      border-radius: 50%;
+      background: var(--bg);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition);
+      flex-shrink: 0;
+    }
+
+    .score-winner-check:hover {
+      border-color: var(--text-dim);
+      background: var(--bg-3);
+    }
+
+    .score-winner-check.checked {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+    }
+
+    .score-winner-check svg {
+      display: none;
+    }
+
+    .score-winner-check.checked svg {
+      display: block;
+    }
+
+    /* Score stepper */
+    .score-stepper-cell {
+      width: 80px;
+    }
+
+    .score-stepper {
+      display: flex;
+      align-items: stretch;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    .score-stepper-val {
+      flex: 1;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 0.875rem;
+      color: var(--text);
       background: transparent;
       border: none;
-      font-size: 0.75rem;
-      color: var(--text-dim);
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      padding: 0;
+      width: 36px;
+      min-width: 0;
+      outline: none;
+      -moz-appearance: textfield;
     }
 
-    .score-set-row {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      gap: 1rem;
+    .score-stepper-val::-webkit-outer-spin-button,
+    .score-stepper-val::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .score-stepper-btn {
+      background: var(--bg-2);
+      border: none;
+      color: var(--text);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 0 0.4rem;
+      line-height: 1;
+      display: flex;
       align-items: center;
+      justify-content: center;
+      transition: background var(--transition);
+      flex-shrink: 0;
+    }
+
+    .score-stepper-btn:hover {
+      background: var(--bg-3);
+    }
+
+    .score-stepper-btn:active {
+      transform: scale(0.9);
+    }
+
+    /* Add set + footer */
+    .score-add-set {
+      display: flex;
+      justify-content: flex-end;
+      padding: 0.25rem 0;
+    }
+
+    .score-add-set-btn {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-dim);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: color var(--transition);
+      padding: 0.25rem 0;
+    }
+
+    .score-add-set-btn:hover {
+      color: var(--text);
+    }
+
+    .score-set-tabs {
+      display: flex;
+      gap: 0.35rem;
       margin-bottom: 0.75rem;
-      position: relative;
+      margin-top: 0.5rem;
     }
 
-    .score-set-row input {
-      text-align: center;
+    .score-set-pip {
+      font-size: 0.6rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.2rem 0.5rem;
+      background: var(--bg-2);
+      cursor: pointer;
+      transition: all var(--transition);
     }
 
-    .score-set-row .set-label {
+    .score-set-pip.active {
+      background: var(--bg-3);
+      color: var(--text);
+      border-color: var(--border-hi);
+    }
+
+    /* Submit footer */
+    .score-submit-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 1.25rem;
+      gap: 1rem;
+    }
+
+    .btn-reset-scores {
+      font-family: var(--font-mono);
       font-size: 0.65rem;
       font-weight: 700;
-      color: var(--text-dim);
       text-transform: uppercase;
-    }
-
-    .set-delete-btn {
-      position: absolute;
-      right: -24px;
-      color: var(--danger);
+      letter-spacing: 0.06em;
+      color: var(--text-dim);
       background: transparent;
       border: none;
-      padding: 4px;
-      opacity: 0.5;
+      cursor: pointer;
+      transition: color var(--transition);
     }
-    .set-delete-btn:hover {
-      opacity: 1;
+
+    .btn-reset-scores:hover {
+      color: var(--danger);
+    }
+
+    .btn-submit-scores {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: var(--text);
+      color: var(--bg);
+      border: none;
+      border-radius: var(--radius);
+      padding: 0.65rem 1.5rem;
+      cursor: pointer;
+      transition: opacity var(--transition), transform var(--transition);
+      flex: 1;
+    }
+
+    .btn-submit-scores:hover {
+      opacity: 0.88;
+    }
+
+    .btn-submit-scores:active {
+      transform: scale(0.97);
     }
 
 
@@ -956,8 +1191,22 @@
     </div>
     <div style="display: flex; align-items: center; gap: 0.5rem;">
       <button class="btn-icon" id="btn-theme-toggle" aria-label="Toggle dark/light mode">
-        <svg id="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-        <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        <svg id="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
       </button>
       <div id="header-actions">
         <!-- injected per-page -->
@@ -1143,40 +1392,51 @@
   ══════════════════════════════════════════════════════════ -->
   <div class="modal-backdrop" id="score-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title-score">
     <div class="modal" role="document">
-      <div class="modal-header">
-        <h2 class="modal-title" id="modal-title-score">Score Match</h2>
-        <button class="btn-icon btn-ghost" id="btn-close-score-modal" aria-label="Close modal">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+
+      <!-- Close button row -->
+      <div style="display:flex; justify-content:flex-end; margin-bottom: 0.5rem;">
+        <button class="btn-icon" id="btn-close-score-modal" aria-label="Close modal">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <path d="M2 2l12 12M14 2L2 14" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
           </svg>
         </button>
       </div>
-      
-      <div id="score-modal-body">
-        <div class="score-names">
-          <label class="score-name score-participant" id="score-p1-label">
-            <input type="checkbox" class="score-check" id="score-p1-radio" style="accent-color: var(--win); cursor: pointer; width: 1.1rem; height: 1.1rem;">
-            <span id="score-p1-name">Player 1</span>
-          </label>
-          <div class="score-name vs">vs</div>
-          <label class="score-name score-participant" id="score-p2-label">
-            <span id="score-p2-name">Player 2</span>
-            <input type="checkbox" class="score-check" id="score-p2-radio" style="accent-color: var(--win); cursor: pointer; width: 1.1rem; height: 1.1rem;">
-          </label>
+
+      <!-- Body -->
+      <div>
+
+        <!-- Column headers -->
+        <div class="score-table-header">
+          <div></div>
+          <div class="score-col-label winner-col">Winner</div>
+          <div class="score-col-label score-col">Score</div>
         </div>
 
+        <!-- Participant rows injected here -->
         <div id="score-sets-container">
-          <!-- Sets dynamically injected -->
+          <!-- dynamically built -->
         </div>
-        <button class="btn btn-ghost" id="btn-add-set" style="width:100%; justify-content:center; margin-bottom: 0.5rem;">
-          + Add Set
-        </button>
+
+        <!-- Set selector + Add Set -->
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-top:0.5rem;">
+          <div class="score-set-tabs" id="score-set-tabs"></div>
+          <div class="score-add-set">
+            <button class="score-add-set-btn" id="btn-add-set">+ Add Set</button>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="score-submit-footer">
+          <button class="btn-reset-scores" id="btn-reset-scores">Reset Scores</button>
+          <button class="btn-submit-scores" id="btn-save-score">Submit Scores</button>
+        </div>
       </div>
 
-      <div class="modal-footer">
-        <button class="btn btn-ghost" id="btn-cancel-score">Cancel</button>
-        <button class="btn btn-primary" id="btn-save-score">Save Match →</button>
-      </div>
+      <!-- Hidden state holders used by JS -->
+      <input type="checkbox" id="score-p1-radio" style="display:none;">
+      <input type="checkbox" id="score-p2-radio" style="display:none;">
+      <span id="score-p1-name" style="display:none;"></span>
+      <span id="score-p2-name" style="display:none;"></span>
     </div>
   </div>
 
@@ -1250,29 +1510,29 @@
       const count = bracket.participants.length;
       let p2 = 1;
       while (p2 < count) p2 *= 2;
-      
+
       const totalRounds = Math.log2(p2);
       const paddedIds = bracket.participants.map(p => p.id);
       while (paddedIds.length < p2) paddedIds.push(null);
-      
+
       const seedOrder = getStandardSeeding(p2);
-      
+
       const round1 = [];
       for (let i = 0; i < p2; i += 2) {
         const idx1 = seedOrder[i];
         const idx2 = seedOrder[i + 1];
         const p1Id = paddedIds[idx1];
         const p2Id = paddedIds[idx2];
-        
+
         let winnerId = null;
         if (p1Id == null) winnerId = p2Id;
         else if (p2Id == null) winnerId = p1Id;
-        
+
         round1.push({
           p1Id, p2Id, winnerId, sets: []
         });
       }
-      
+
       const rounds = [round1];
       for (let r = 1; r < totalRounds; r++) {
         const prevMatches = rounds[r - 1];
@@ -1282,13 +1542,13 @@
           const m2 = prevMatches[m + 1];
           const p1Id = m1.winnerId;
           const p2Id = m2.winnerId;
-          
+
           let winnerId = null;
           if (p1Id != null && p2Id == null && m2.p1Id == null && m2.p2Id == null) {
             // Edge case: if an entire side is byes
           }
           // The byes from R1 should auto-fill R2.
-          
+
           nextMatches.push({
             p1Id: p1Id !== undefined ? p1Id : null,
             p2Id: p2Id !== undefined ? p2Id : null,
@@ -1310,7 +1570,7 @@
       }
       return bracket;
     }
-    
+
     function cascadeByes(bracket) {
       let changed = true;
       while (changed) {
@@ -1342,13 +1602,13 @@
     function startBracket(bracket) {
       bracket.status = 'active';
       bracket.rounds = buildInitialRounds(bracket);
-      
+
       bracket = cascadeByes(bracket);
       bracket = updateBracketStatus(bracket);
-      
+
       return bracket;
     }
-    
+
     function isSlotDead(bracket, roundIdx, matchIdx, slotIdx) {
       if (roundIdx === 0) return true;
       const prevRound = roundIdx - 1;
@@ -1366,7 +1626,7 @@
     function advanceWinner(bracket, roundIdx, matchIdx, winnerId) {
       const match = bracket.rounds[roundIdx][matchIdx];
       const oldWinnerId = match.winnerId;
-      
+
       match.winnerId = winnerId;
 
       if (oldWinnerId !== winnerId) {
@@ -1556,7 +1816,7 @@
         setTimeout(() => document.getElementById('input-bracket-name').style.borderColor = '', 1500);
         return;
       }
-      
+
       let count = parseInt(document.getElementById('input-participant-count').value);
       if (isNaN(count) || count < 3) count = 3;
 
@@ -1748,7 +2008,7 @@
     function renderActiveCanvas(bracket, canvas) {
       const totalRounds = bracket.rounds.length;
       canvas.innerHTML = '';
-      
+
       if (bracket.layout === 'double' && totalRounds >= 2) {
         // Double-sided layout
         const leftSide = document.createElement('div');
@@ -1756,51 +2016,51 @@
         const rightSide = document.createElement('div');
         rightSide.style.display = 'flex';
         rightSide.style.flexDirection = 'row-reverse';
-        
+
         for (let r = 0; r < totalRounds - 1; r++) {
           const roundMatches = bracket.rounds[r];
           const half = roundMatches.length / 2;
-          
+
           // Left column
           leftSide.appendChild(buildRoundCol(bracket, r, totalRounds, 0, half, 'L'));
           if (r < totalRounds - 2) {
             leftSide.appendChild(buildConnectorCol(r, 'L'));
           }
-          
+
           // Right column
           rightSide.appendChild(buildRoundCol(bracket, r, totalRounds, half, roundMatches.length, 'R'));
           if (r < totalRounds - 2) {
             rightSide.appendChild(buildConnectorCol(r, 'R'));
           }
         }
-        
+
         // Final match + champion in the center
         const centerCol = document.createElement('div');
         centerCol.className = 'champion-col';
         centerCol.style.padding = '0 1rem';
-        
+
         const finalMatchesWrap = document.createElement('div');
         finalMatchesWrap.className = 'round-matches';
         finalMatchesWrap.style.gap = '1rem';
         const finalMatch = bracket.rounds[totalRounds - 1][0];
         const finalEl = buildMatchCard(bracket, finalMatch, totalRounds - 1, 0, 'C');
         finalMatchesWrap.appendChild(finalEl);
-        
+
         centerCol.innerHTML = `<div class="round-header" style="text-align:center;width:100%;">Final</div>`;
         centerCol.appendChild(finalMatchesWrap);
-        
+
         // Left to Final Connector
         const leftFinalConn = buildConnectorCol(totalRounds - 2, 'C-L');
         // Right to Final Connector
         const rightFinalConn = buildConnectorCol(totalRounds - 2, 'C-R');
-        
+
         // Assemble
         canvas.appendChild(leftSide);
         canvas.appendChild(leftFinalConn);
         canvas.appendChild(centerCol);
         canvas.appendChild(rightFinalConn);
         canvas.appendChild(rightSide);
-        
+
         // Champion below final
         const champion = getChampion(bracket);
         const champBox = document.createElement('div');
@@ -1822,18 +2082,18 @@
           </div>`;
         }
         centerCol.appendChild(champBox);
-        
+
       } else {
         // Single-sided layout
         for (let r = 0; r < totalRounds; r++) {
           const roundMatches = bracket.rounds[r];
           canvas.appendChild(buildRoundCol(bracket, r, totalRounds, 0, roundMatches.length, 'S'));
-          
+
           if (r < totalRounds - 1) {
             canvas.appendChild(buildConnectorCol(r, 'S'));
           }
         }
-        
+
         // Champion column
         const champion = getChampion(bracket);
         const champCol = document.createElement('div');
@@ -1860,17 +2120,17 @@
 
       requestAnimationFrame(() => drawConnectors(canvas, bracket));
     }
-    
+
     function buildRoundCol(bracket, r, totalRounds, startIdx, endIdx, prefix) {
       const col = document.createElement('div');
       col.className = 'round-col';
       const roundName = getRoundName(r, totalRounds);
       col.innerHTML = `<div class="round-header">${roundName}</div>`;
-      
+
       const matchesWrap = document.createElement('div');
       matchesWrap.className = 'round-matches';
       matchesWrap.style.gap = '0';
-      
+
       for (let mIdx = startIdx; mIdx < endIdx; mIdx++) {
         const match = bracket.rounds[r][mIdx];
         const matchEl = buildMatchCard(bracket, match, r, mIdx, prefix);
@@ -1949,20 +2209,21 @@
     let currentScoreMatch = null;
     let matchSets = [];
     let userOverriddenWinner = null;
+    let currentSetIdx = 0;
 
     function calculateAutoWinner(sets) {
-       let p1Wins = 0, p2Wins = 0;
-       sets.forEach(s => {
-         const p1 = parseFloat(s.p1);
-         const p2 = parseFloat(s.p2);
-         if (!isNaN(p1) && !isNaN(p2)) {
-           if (p1 > p2) p1Wins++;
-           else if (p2 > p1) p2Wins++;
-         }
-       });
-       if (p1Wins > p2Wins) return 'p1';
-       if (p2Wins > p1Wins) return 'p2';
-       return null;
+      let p1Wins = 0, p2Wins = 0;
+      sets.forEach(s => {
+        const p1 = parseFloat(s.p1);
+        const p2 = parseFloat(s.p2);
+        if (!isNaN(p1) && !isNaN(p2)) {
+          if (p1 > p2) p1Wins++;
+          else if (p2 > p1) p2Wins++;
+        }
+      });
+      if (p1Wins > p2Wins) return 'p1';
+      if (p2Wins > p1Wins) return 'p2';
+      return null;
     }
 
     function updateWinnerCheckmarks(autoUpdate = false) {
@@ -1997,14 +2258,16 @@
     function openScoreModal(r, m) {
       let bracket = getBracket(currentBracketId);
       let match = bracket.rounds[r][m];
-      currentScoreMatch = {r, m};
+      currentScoreMatch = { r, m };
+      currentSetIdx = 0;
       matchSets = JSON.parse(JSON.stringify(match.sets || []));
       if (matchSets.length === 0) {
-        matchSets.push({p1: '', p2: ''});
+        matchSets.push({ p1: '', p2: '' });
       }
-      
+
       const p1Name = getParticipantName(bracket, match.p1Id);
       const p2Name = getParticipantName(bracket, match.p2Id);
+      // Store names in hidden elements for renderSets to read
       document.getElementById('score-p1-name').textContent = p1Name;
       document.getElementById('score-p2-name').textContent = p2Name;
 
@@ -2015,8 +2278,11 @@
         userOverriddenWinner = null;
       }
 
+      // Sync hidden checkboxes before renderSets reads them
+      document.getElementById('score-p1-radio').checked = (userOverriddenWinner === 'p1');
+      document.getElementById('score-p2-radio').checked = (userOverriddenWinner === 'p2');
+
       renderSets();
-      updateWinnerCheckmarks();
       document.getElementById('score-modal').classList.add('open');
     }
 
@@ -2026,47 +2292,158 @@
     }
 
     document.getElementById('btn-close-score-modal').addEventListener('click', closeScoreModal);
-    document.getElementById('btn-cancel-score').addEventListener('click', closeScoreModal);
     document.getElementById('score-modal').addEventListener('click', e => {
       if (e.target === e.currentTarget) closeScoreModal();
     });
 
     document.getElementById('btn-add-set').addEventListener('click', () => {
-      matchSets.push({p1: '', p2: ''});
+      matchSets.push({ p1: '', p2: '' });
+      currentSetIdx = matchSets.length - 1;
       renderSets();
     });
 
+    document.getElementById('btn-reset-scores').addEventListener('click', () => {
+      matchSets = [{ p1: '', p2: '' }];
+      currentSetIdx = 0;
+      userOverriddenWinner = null;
+      document.getElementById('score-p1-radio').checked = false;
+      document.getElementById('score-p2-radio').checked = false;
+      renderSets();
+    });
+
+
     function renderSets() {
+      // Clamp active set index
+      if (currentSetIdx >= matchSets.length) currentSetIdx = matchSets.length - 1;
+      if (currentSetIdx < 0) currentSetIdx = 0;
+
+      const bracket = getBracket(currentBracketId);
+      const match = bracket.rounds[currentScoreMatch.r][currentScoreMatch.m];
+      const p1Name = document.getElementById('score-p1-name').textContent;
+      const p2Name = document.getElementById('score-p2-name').textContent;
+      const p1Seed = (() => {
+        if (currentScoreMatch.r === 0 && match.p1Id != null) {
+          const pIdx = bracket.participants.findIndex(p => p.id === match.p1Id);
+          return pIdx !== -1 ? pIdx + 1 : '';
+        }
+        return '';
+      })();
+      const p2Seed = (() => {
+        if (currentScoreMatch.r === 0 && match.p2Id != null) {
+          const pIdx = bracket.participants.findIndex(p => p.id === match.p2Id);
+          return pIdx !== -1 ? pIdx + 1 : '';
+        }
+        return '';
+      })();
+
+      const s = matchSets[currentSetIdx] || { p1: '', p2: '' };
+      const p1Checked = document.getElementById('score-p1-radio').checked;
+      const p2Checked = document.getElementById('score-p2-radio').checked;
+
       const c = document.getElementById('score-sets-container');
-      c.innerHTML = '';
-      matchSets.forEach((s, idx) => {
-        const row = document.createElement('div');
-        row.className = 'score-set-row';
-        row.innerHTML = `
-          <input type="number" min="0" value="${s.p1}" placeholder="0" class="set-p1" data-idx="${idx}" />
-          <span class="set-label">Set ${idx + 1}</span>
-          <input type="number" min="0" value="${s.p2}" placeholder="0" class="set-p2" data-idx="${idx}" />
-          <button class="set-delete-btn" data-idx="${idx}">✕</button>
-        `;
-        c.appendChild(row);
-      });
+      c.innerHTML = `
+        <div class="score-participant-row${p1Checked ? ' is-winner' : ''}" id="score-row-p1">
+          <div class="score-p-identity">
+            <span class="score-p-seed">${p1Seed}</span>
+            <span class="score-p-name">${escHtml(p1Name)}</span>
+          </div>
+          <div class="score-winner-cell">
+            <div class="score-winner-check${p1Checked ? ' checked' : ''}" id="score-check-p1" role="checkbox"
+              aria-checked="${p1Checked}" tabindex="0" aria-label="Select ${escHtml(p1Name)} as winner">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M3 8l3.5 3.5L13 4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+          <div class="score-stepper-cell">
+            <div class="score-stepper">
+              <button class="score-stepper-btn" data-target="p1" data-dir="-1" aria-label="Decrease score">−</button>
+              <input type="number" class="score-stepper-val" id="stepper-p1-val"
+                min="0" value="${s.p1 !== '' ? s.p1 : 0}" data-idx="${currentSetIdx}" data-which="p1" />
+              <button class="score-stepper-btn" data-target="p1" data-dir="1" aria-label="Increase score">+</button>
+            </div>
+          </div>
+        </div>
+        <div class="score-participant-row${p2Checked ? ' is-winner' : ''}" id="score-row-p2">
+          <div class="score-p-identity">
+            <span class="score-p-seed">${p2Seed}</span>
+            <span class="score-p-name">${escHtml(p2Name)}</span>
+          </div>
+          <div class="score-winner-cell">
+            <div class="score-winner-check${p2Checked ? ' checked' : ''}" id="score-check-p2" role="checkbox"
+              aria-checked="${p2Checked}" tabindex="0" aria-label="Select ${escHtml(p2Name)} as winner">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M3 8l3.5 3.5L13 4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+          <div class="score-stepper-cell">
+            <div class="score-stepper">
+              <button class="score-stepper-btn" data-target="p2" data-dir="-1" aria-label="Decrease score">−</button>
+              <input type="number" class="score-stepper-val" id="stepper-p2-val"
+                min="0" value="${s.p2 !== '' ? s.p2 : 0}" data-idx="${currentSetIdx}" data-which="p2" />
+              <button class="score-stepper-btn" data-target="p2" data-dir="1" aria-label="Increase score">+</button>
+            </div>
+          </div>
+        </div>
+      `;
 
-      c.querySelectorAll('.set-p1, .set-p2').forEach(inp => {
-        inp.addEventListener('input', (e) => {
-          const idx = parseInt(e.target.dataset.idx);
-          if (e.target.classList.contains('set-p1')) matchSets[idx].p1 = e.target.value;
-          else matchSets[idx].p2 = e.target.value;
-          updateWinnerCheckmarks(true);
-        });
-      });
+      // Set pip tabs
+      const tabsEl = document.getElementById('score-set-tabs');
+      tabsEl.innerHTML = matchSets.map((_, i) =>
+        `<button class="score-set-pip${i === currentSetIdx ? ' active' : ''}" data-set-idx="${i}" aria-label="Set ${i + 1}">Set ${i + 1}</button>`
+      ).join('');
 
-      c.querySelectorAll('.set-delete-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const idx = parseInt(e.target.dataset.idx);
-          matchSets.splice(idx, 1);
+      // Pip click
+      tabsEl.querySelectorAll('.score-set-pip').forEach(pip => {
+        pip.addEventListener('click', () => {
+          currentSetIdx = parseInt(pip.dataset.setIdx);
           renderSets();
+        });
+      });
+
+      // Stepper buttons
+      c.querySelectorAll('.score-stepper-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const which = btn.dataset.target;
+          const dir = parseInt(btn.dataset.dir);
+          const inp = c.querySelector(`#stepper-${which}-val`);
+          const cur = parseInt(inp.value) || 0;
+          const nv = Math.max(0, cur + dir);
+          inp.value = nv;
+          matchSets[currentSetIdx][which] = nv;
+          updateWinnerCheckmarks(true);
+          renderSets();
+        });
+      });
+
+      // Direct input
+      c.querySelectorAll('.score-stepper-val').forEach(inp => {
+        inp.addEventListener('input', () => {
+          matchSets[currentSetIdx][inp.dataset.which] = inp.value;
           updateWinnerCheckmarks(true);
         });
+      });
+
+      // Winner check buttons
+      c.querySelector('#score-check-p1').addEventListener('click', () => {
+        userOverriddenWinner = document.getElementById('score-p1-radio').checked ? null : 'p1';
+        document.getElementById('score-p1-radio').checked = (userOverriddenWinner === 'p1');
+        document.getElementById('score-p2-radio').checked = false;
+        renderSets();
+      });
+      c.querySelector('#score-check-p1').addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); c.querySelector('#score-check-p1').click(); }
+      });
+
+      c.querySelector('#score-check-p2').addEventListener('click', () => {
+        userOverriddenWinner = document.getElementById('score-p2-radio').checked ? null : 'p2';
+        document.getElementById('score-p2-radio').checked = (userOverriddenWinner === 'p2');
+        document.getElementById('score-p1-radio').checked = false;
+        renderSets();
+      });
+      c.querySelector('#score-check-p2').addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); c.querySelector('#score-check-p2').click(); }
       });
     }
 
@@ -2074,7 +2451,7 @@
       if (!currentScoreMatch) return;
       let bracket = getBracket(currentBracketId);
       const match = bracket.rounds[currentScoreMatch.r][currentScoreMatch.m];
-      
+
       const cleanSets = matchSets.map(s => ({ p1: s.p1 !== '' ? parseFloat(s.p1) : 0, p2: s.p2 !== '' ? parseFloat(s.p2) : 0 }));
       match.sets = cleanSets;
 
@@ -2091,7 +2468,7 @@
       bracket = advanceWinner(bracket, currentScoreMatch.r, currentScoreMatch.m, winnerId);
       bracket = cascadeByes(bracket);
       bracket = updateBracketStatus(bracket);
-      
+
       upsertBracket(bracket);
       closeScoreModal();
       renderEditor();
@@ -2122,11 +2499,11 @@
         for (let r = 0; r < totalRounds - 1; r++) {
           const half = bracket.rounds[r].length / 2;
           if (r < totalRounds - 2) {
-             drawSideConnectors(bracket, r, 0, half, 'L', 'L', false);
-             drawSideConnectors(bracket, r, half, bracket.rounds[r].length, 'R', 'R', true);
+            drawSideConnectors(bracket, r, 0, half, 'L', 'L', false);
+            drawSideConnectors(bracket, r, half, bracket.rounds[r].length, 'R', 'R', true);
           } else {
-             drawToCenterConnectors(bracket, r, 0, 1, 'L', 'C', false);
-             drawToCenterConnectors(bracket, r, 1, 2, 'R', 'C', true);
+            drawToCenterConnectors(bracket, r, 0, 1, 'L', 'C', false);
+            drawToCenterConnectors(bracket, r, 1, 2, 'R', 'C', true);
           }
         }
       } else {
@@ -2140,7 +2517,7 @@
       const connectorCol = document.getElementById(`connector-${srcPre}-${r}`);
       if (!connectorCol) return;
       const colRect = connectorCol.getBoundingClientRect();
-      
+
       const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       svg.classList.add('bracket-svg');
       svg.style.cssText = `position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;`;
@@ -2150,10 +2527,10 @@
         let validM = m;
         // In double sided right half, nextMatchIdx is shifted
         let nextMatchIdx = Math.floor(m / 2);
-        
+
         let topM = bracket.rounds[r][m];
         let btmM = bracket.rounds[r][m + 1] || topM; // fallback just in case
-        
+
         const topMatchEl = document.getElementById(`match-${srcPre}-${r}-${m}`);
         const btmMatchEl = document.getElementById(`match-${srcPre}-${r}-${m + 1}`);
         const nextMatchEl = document.getElementById(`match-${dstPre}-${r + 1}-${nextMatchIdx}`);
@@ -2170,7 +2547,7 @@
           x0 = topRect.left - colRect.left;
           xEnd = nxtRect.right - colRect.left;
         }
-        
+
         const xMid = colRect.width / 2;
         const y1 = topRect.top + topRect.height / 2 - colRect.top;
         const y2 = btmRect.top + btmRect.height / 2 - colRect.top;
@@ -2189,17 +2566,17 @@
         makePath(svg, `M ${xMid} ${yMid} H ${xEnd}`, cssVar, sw, 'none', nextExists);
       }
     }
-    
+
     function drawToCenterConnectors(bracket, r, m, limit, srcPre, dstPre, isReversed) {
       const connectorCol = document.getElementById(`connector-C-${srcPre}`);
       if (!connectorCol) return;
       const colRect = connectorCol.getBoundingClientRect();
-      
+
       const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       svg.classList.add('bracket-svg');
       svg.style.cssText = `position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;`;
       connectorCol.appendChild(svg);
-      
+
       const topMatchEl = document.getElementById(`match-${srcPre}-${r}-${m}`);
       const nextMatchEl = document.getElementById(`match-${dstPre}-${r + 1}-0`); // Final
 
@@ -2214,7 +2591,7 @@
         x0 = topRect.left - colRect.left;
         xEnd = nxtRect.right - colRect.left;
       }
-      
+
       const y1 = topRect.top + topRect.height / 2 - colRect.top;
       const yEnd = nxtRect.top + nxtRect.height / 2 - colRect.top;
 
