@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BracketHQ — Tournament Bracket Builder</title>
+  <title>Brack — Tournament Bracket Builder</title>
   <meta name="description"
     content="Create, seed, and run single-elimination tournament brackets locally. No account required — everything saves in your browser." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -916,7 +916,7 @@
   ══════════════════════════════════════════════════════════ -->
   <header class="app-header" role="banner">
     <div class="logo" id="logo-home-btn" role="button" tabindex="0" aria-label="Go to dashboard">
-      <span class="logo-bracket">[</span>BRACKET<span class="logo-bracket">]</span>HQ
+      <span class="logo-bracket">[</span>BRACK<span class="logo-bracket">]</span>
       <span class="logo-dot" aria-hidden="true"></span>
     </div>
     <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -1154,7 +1154,7 @@
     /* ============================================================
        STORAGE
     ============================================================ */
-    const STORAGE_KEY = 'bracketHQ_brackets';
+    const STORAGE_KEY = 'brack_brackets';
 
     function loadBrackets() {
       try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
