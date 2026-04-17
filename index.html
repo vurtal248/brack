@@ -1388,6 +1388,11 @@
         </select>
       </div>
 
+      <div class="form-group" style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1rem;">
+        <input type="checkbox" id="input-bracket-3rd" style="width:auto; margin:0; padding:0;">
+        <label class="form-label" for="input-bracket-3rd" style="margin:0; cursor:pointer;">Include 3rd Place Match</label>
+      </div>
+
       <div class="form-group">
         <label class="form-label" for="input-bracket-tag">Sport / Category <span
             style="opacity:.5">(optional)</span></label>
@@ -1519,7 +1524,7 @@
     /* ============================================================
        BRACKET DATA MODEL
     ============================================================ */
-    function createBracket(name, count, tag, layout) {
+    function createBracket(name, count, tag, layout, include3rdPlace) {
       const id = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36);
       const participants = Array.from({ length: count }, (_, i) => ({ id: i, name: '' }));
       return {
@@ -1527,6 +1532,8 @@
         name: name.trim(),
         tag: tag.trim(),
         layout: layout || 'single',
+        include3rdPlace: !!include3rdPlace,
+        thirdPlaceMatch: include3rdPlace ? { p1Id: null, p2Id: null, winnerId: null, sets: [] } : null,
         createdAt: new Date().toISOString(),
         status: 'seeding',
         participants,        // [{id, name}]
@@ -1606,7 +1613,15 @@
       if (bracket.status === 'seeding') return bracket;
       const lastRound = bracket.rounds[bracket.rounds.length - 1];
       if (lastRound && lastRound.length === 1 && lastRound[0].winnerId != null) {
-        bracket.status = 'complete';
+        if (bracket.include3rdPlace && bracket.thirdPlaceMatch) {
+          if (bracket.thirdPlaceMatch.winnerId != null) {
+            bracket.status = 'complete';
+          } else {
+            bracket.status = 'active';
+          }
+        } else {
+          bracket.status = 'complete';
+        }
       } else {
         bracket.status = 'active';
       }
@@ -1696,6 +1711,17 @@
           if (isP1) bracket.rounds[r][m].p1Id = winnerId;
           else bracket.rounds[r][m].p2Id = winnerId;
 
+          // Handle 3rd place mapping if this was a semi-final match
+          if (bracket.include3rdPlace && bracket.thirdPlaceMatch && r === bracket.rounds.length - 1) {
+            let loserId = null;
+            if (winnerId != null) {
+              loserId = (winnerId === match.p1Id) ? match.p2Id : match.p1Id;
+            }
+            if (isP1) bracket.thirdPlaceMatch.p1Id = loserId;
+            else bracket.thirdPlaceMatch.p2Id = loserId;
+            bracket.thirdPlaceMatch.winnerId = null; // reset if changed
+          }
+
           // Clear old winner downstream if they had advanced
           let currR = r;
           let currM = m;
@@ -1737,6 +1763,9 @@
     function resetBracket(bracket) {
       bracket.status = 'seeding';
       bracket.rounds = [];
+      if (bracket.include3rdPlace) {
+        bracket.thirdPlaceMatch = { p1Id: null, p2Id: null, winnerId: null, sets: [] };
+      }
       return bracket;
     }
 
@@ -1853,6 +1882,8 @@
       document.getElementById('input-participant-count').value = '8';
       document.getElementById('input-bracket-tag').value = '';
       document.getElementById('input-bracket-layout').value = 'single';
+      const thirdPlaceEl = document.getElementById('input-bracket-3rd');
+      if (thirdPlaceEl) thirdPlaceEl.checked = false;
       document.getElementById('create-modal').classList.add('open');
       setTimeout(() => document.getElementById('input-bracket-name').focus(), 100);
     }
@@ -1879,7 +1910,9 @@
 
       const layout = document.getElementById('input-bracket-layout').value;
       const tag = document.getElementById('input-bracket-tag').value.trim();
-      const bracket = createBracket(name, count, tag, layout);
+      const thirdPlaceEl = document.getElementById('input-bracket-3rd');
+      const include3rdPlace = thirdPlaceEl ? thirdPlaceEl.checked : false;
+      const bracket = createBracket(name, count, tag, layout, include3rdPlace);
       upsertBracket(bracket);
       closeCreateModal();
       openEditor(bracket.id);
@@ -2123,6 +2156,9 @@
         const champBox = document.createElement('div');
         champBox.style.marginTop = '2rem';
         champBox.style.width = '100%';
+        champBox.style.display = 'flex';
+        champBox.style.flexDirection = 'column';
+        champBox.style.alignItems = 'center';
         if (champion) {
           champBox.innerHTML = `
           <div class="champion-card" role="status" aria-live="polite">
@@ -2138,6 +2174,21 @@
             <div class="champion-sub">Pick winners to advance</div>
           </div>`;
         }
+
+        if (bracket.include3rdPlace && bracket.thirdPlaceMatch && totalRounds >= 2) {
+          const thirdMatchWrapper = document.createElement('div');
+          thirdMatchWrapper.style.marginTop = '2rem';
+          thirdMatchWrapper.style.width = '100%';
+          thirdMatchWrapper.style.display = 'flex';
+          thirdMatchWrapper.style.flexDirection = 'column';
+          thirdMatchWrapper.style.alignItems = 'center';
+          thirdMatchWrapper.innerHTML = `<div class="champion-label" style="text-align:center;width:100%;margin-bottom:0.5rem;border:none;">3rd Place</div>`;
+          const thirdMatchEl = buildMatchCard(bracket, bracket.thirdPlaceMatch, '3rd', 0, '3rd');
+          thirdMatchEl.style.margin = '0';
+          thirdMatchWrapper.appendChild(thirdMatchEl);
+          champBox.appendChild(thirdMatchWrapper);
+        }
+
         centerCol.appendChild(champBox);
 
       } else {
@@ -2172,6 +2223,17 @@
             <div class="champion-sub">Pick winners to advance</div>
           </div>`;
         }
+
+        if (bracket.include3rdPlace && bracket.thirdPlaceMatch && totalRounds >= 2) {
+          const thirdMatchWrapper = document.createElement('div');
+          thirdMatchWrapper.style.marginTop = '2rem';
+          thirdMatchWrapper.style.width = '100%';
+          thirdMatchWrapper.innerHTML = `<div class="champion-label" style="text-align:center;width:100%;margin-bottom:0.5rem;border:none;">3rd Place</div>`;
+          const thirdMatchEl = buildMatchCard(bracket, bracket.thirdPlaceMatch, '3rd', 0, 'S');
+          thirdMatchWrapper.appendChild(thirdMatchEl);
+          champCol.appendChild(thirdMatchWrapper);
+        }
+
         canvas.appendChild(champCol);
       }
 
@@ -2329,7 +2391,7 @@
 
     function openScoreModal(r, m) {
       let bracket = getBracket(currentBracketId);
-      let match = bracket.rounds[r][m];
+      let match = (r === '3rd') ? bracket.thirdPlaceMatch : bracket.rounds[r][m];
       currentScoreMatch = { r, m };
       currentSetIdx = 0;
       matchSets = JSON.parse(JSON.stringify(match.sets || []));
@@ -2390,7 +2452,7 @@
       if (currentSetIdx < 0) currentSetIdx = 0;
 
       const bracket = getBracket(currentBracketId);
-      const match = bracket.rounds[currentScoreMatch.r][currentScoreMatch.m];
+      const match = (currentScoreMatch.r === '3rd') ? bracket.thirdPlaceMatch : bracket.rounds[currentScoreMatch.r][currentScoreMatch.m];
       const p1Name = document.getElementById('score-p1-name').textContent;
       const p2Name = document.getElementById('score-p2-name').textContent;
       const p1Seed = (() => {
@@ -2543,7 +2605,7 @@
     document.getElementById('btn-save-no-winner').addEventListener('click', () => {
       if (!currentScoreMatch) return;
       let bracket = getBracket(currentBracketId);
-      const match = bracket.rounds[currentScoreMatch.r][currentScoreMatch.m];
+      const match = (currentScoreMatch.r === '3rd') ? bracket.thirdPlaceMatch : bracket.rounds[currentScoreMatch.r][currentScoreMatch.m];
 
       // Persist the sets as-is; do NOT touch winnerId or advance anyone
       const cleanSets = matchSets.map(s => ({ p1: s.p1 !== '' ? parseFloat(s.p1) : 0, p2: s.p2 !== '' ? parseFloat(s.p2) : 0 }));
@@ -2558,7 +2620,7 @@
     document.getElementById('btn-save-score').addEventListener('click', () => {
       if (!currentScoreMatch) return;
       let bracket = getBracket(currentBracketId);
-      const match = bracket.rounds[currentScoreMatch.r][currentScoreMatch.m];
+      const match = (currentScoreMatch.r === '3rd') ? bracket.thirdPlaceMatch : bracket.rounds[currentScoreMatch.r][currentScoreMatch.m];
 
       const cleanSets = matchSets.map(s => ({ p1: s.p1 !== '' ? parseFloat(s.p1) : 0, p2: s.p2 !== '' ? parseFloat(s.p2) : 0 }));
       match.sets = cleanSets;
@@ -2577,8 +2639,13 @@
         return;
       }
 
-      bracket = advanceWinner(bracket, currentScoreMatch.r, currentScoreMatch.m, winnerId);
-      bracket = cascadeByes(bracket);
+      if (currentScoreMatch.r === '3rd') {
+        match.winnerId = winnerId;
+      } else {
+        bracket = advanceWinner(bracket, currentScoreMatch.r, currentScoreMatch.m, winnerId);
+        bracket = cascadeByes(bracket);
+      }
+
       bracket = updateBracketStatus(bracket);
 
       upsertBracket(bracket);
