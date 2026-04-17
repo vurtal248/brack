@@ -2679,10 +2679,12 @@
           const cssVar = topWon || btmWon ? 'var(--win)' : 'var(--border)';
           const sw = topWon || btmWon ? '1.5' : '1';
 
-          makePath(svg, `M ${x0top} ${y1} H ${xMid}`, cssVar, sw, 'none', topWon);
-          makePath(svg, `M ${x0btm} ${y2} H ${xMid}`, cssVar, sw, 'none', btmWon);
-          makePath(svg, `M ${xMid} ${y1} V ${y2}`, cssVar, sw, 'none', topWon && btmWon);
-          makePath(svg, `M ${xMid} ${yMid} H ${xEnd}`, cssVar, sw, 'none', nextExists);
+          // Classic bracket elbow: cubic bezier, horizontal tangent at both ends
+          // CP1 = pull right from card; CP2 = pull left into merge point
+          const cpTopX1 = x0top + (xEnd - x0top) * 0.5;
+          const cpBtmX1 = x0btm + (xEnd - x0btm) * 0.5;
+          makePath(svg, `M ${x0top} ${y1} C ${cpTopX1} ${y1}, ${xEnd} ${yMid}, ${xEnd} ${yMid}`, cssVar, sw, topWon || nextExists);
+          makePath(svg, `M ${x0btm} ${y2} C ${cpBtmX1} ${y2}, ${xEnd} ${yMid}, ${xEnd} ${yMid}`, cssVar, sw, btmWon || nextExists);
 
         } else {
           // One (or both) is a bye — draw a single straight line from the real
@@ -2701,8 +2703,9 @@
           const cssVar = won ? 'var(--win)' : 'var(--border)';
           const sw = won ? '1.5' : '1';
 
-          // Horizontal to mid, then step to dst Y, then to next card
-          makePath(svg, `M ${x0} ${y1} H ${xMid} V ${yDst} H ${xEnd}`, cssVar, sw, 'none', nextExists);
+          // Smooth S-curve for bye connector — cubic bezier horizontal tangent at both ends
+          const bxCp1 = x0 + (xEnd - x0) * 0.5;
+          makePath(svg, `M ${x0} ${y1} C ${bxCp1} ${y1}, ${xEnd} ${yDst}, ${xEnd} ${yDst}`, cssVar, sw, nextExists);
         }
       }
     }
@@ -2742,17 +2745,19 @@
 
       // Connect source to center final directly (simple smooth diagonal or stepped)
       const xMid = colRect.width / 2;
-      makePath(svg, `M ${x0} ${y1} H ${xMid} V ${yEnd} H ${xEnd}`, cssVar, sw, 'none', topWon);
+      // Smooth S-curve for semi-final → final connectors
+      const cp1x = x0 + (xEnd - x0) * 0.5;
+      makePath(svg, `M ${x0} ${y1} C ${cp1x} ${y1}, ${xEnd} ${yEnd}, ${xEnd} ${yEnd}`, cssVar, sw, topWon);
     }
 
-    function makePath(svg, d, stroke, strokeWidth, filter, active) {
+    function makePath(svg, d, stroke, strokeWidth, active) {
       const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       path.setAttribute('d', d);
       path.setAttribute('fill', 'none');
       path.setAttribute('stroke', active ? 'var(--win)' : stroke);
       path.setAttribute('stroke-width', strokeWidth);
-      path.setAttribute('stroke-linecap', 'square');
-      if (active && filter !== 'none') path.style.filter = filter;
+      path.setAttribute('stroke-linecap', 'round');
+      path.setAttribute('stroke-linejoin', 'round');
       svg.appendChild(path);
     }
 
