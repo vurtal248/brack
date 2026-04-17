@@ -2679,10 +2679,17 @@
           const cssVar = topWon || btmWon ? 'var(--win)' : 'var(--border)';
           const sw = topWon || btmWon ? '1.5' : '1';
 
-          // Orthogonal bracket arms: horizontal stub → shared vertical spine → horizontal exit
-          makePath(svg, `M ${x0top} ${y1} H ${xMid}`, cssVar, sw, topWon);
-          makePath(svg, `M ${x0btm} ${y2} H ${xMid}`, cssVar, sw, btmWon);
-          makePath(svg, `M ${xMid} ${y1} V ${y2}`, cssVar, sw, topWon && btmWon);
+          // Rounded-corner bracket arms:
+          // travel horizontal, Q-arc around the 90° elbow, drop vertical to yMid, exit horizontal
+          const r = 8;
+          const cx = isReversed ? xMid + r : xMid - r; // approach elbow from arm side
+          const topVDir = yMid >= y1 ? r : -r;          // which way the top arm bends vertically
+          const btmVDir = yMid <= y2 ? -r : r;          // bottom arm bends the other way
+          // Top arm
+          makePath(svg, `M ${x0top} ${y1} H ${cx} Q ${xMid} ${y1} ${xMid} ${y1 + topVDir} V ${yMid}`, cssVar, sw, topWon);
+          // Bottom arm
+          makePath(svg, `M ${x0btm} ${y2} H ${cx} Q ${xMid} ${y2} ${xMid} ${y2 + btmVDir} V ${yMid}`, cssVar, sw, btmWon);
+          // Shared horizontal exit from spine midpoint to next card
           makePath(svg, `M ${xMid} ${yMid} H ${xEnd}`, cssVar, sw, nextExists);
 
         } else {
@@ -2702,8 +2709,15 @@
           const cssVar = won ? 'var(--win)' : 'var(--border)';
           const sw = won ? '1.5' : '1';
 
-          // Bye: straight horizontal → vertical step → horizontal to next card
-          makePath(svg, `M ${x0} ${y1} H ${xMid} V ${yDst} H ${xEnd}`, cssVar, sw, nextExists);
+          // Bye: two rounded elbows — horizontal → arc → vertical → arc → horizontal
+          const r = 8;
+          const vDir = yDst >= y1 ? 1 : -1;
+          const c1x = isReversed ? xMid + r : xMid - r; // elbow 1: arm bends into spine
+          const c2x = isReversed ? xMid - r : xMid + r; // elbow 2: spine bends toward exit
+          makePath(svg,
+            `M ${x0} ${y1} H ${c1x} Q ${xMid} ${y1} ${xMid} ${y1 + vDir * r}` +
+            ` V ${yDst - vDir * r} Q ${xMid} ${yDst} ${c2x} ${yDst} H ${xEnd}`,
+            cssVar, sw, nextExists);
         }
       }
     }
@@ -2741,9 +2755,16 @@
       const cssVar = topWon ? 'var(--win)' : 'var(--border)';
       const sw = topWon ? '1.5' : '1';
 
-      // Semi-final → final: orthogonal stepped connector
+      // Semi-final → final: two rounded elbows
       const xMid = colRect.width / 2;
-      makePath(svg, `M ${x0} ${y1} H ${xMid} V ${yEnd} H ${xEnd}`, cssVar, sw, topWon);
+      const cr = 8;
+      const vDir = yEnd >= y1 ? 1 : -1;
+      const c1x = isReversed ? xMid + cr : xMid - cr;
+      const c2x = isReversed ? xMid - cr : xMid + cr;
+      makePath(svg,
+        `M ${x0} ${y1} H ${c1x} Q ${xMid} ${y1} ${xMid} ${y1 + vDir * cr}` +
+        ` V ${yEnd - vDir * cr} Q ${xMid} ${yEnd} ${c2x} ${yEnd} H ${xEnd}`,
+        cssVar, sw, topWon);
     }
 
     function makePath(svg, d, stroke, strokeWidth, active) {
