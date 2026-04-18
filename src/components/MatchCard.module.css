@@ -5,7 +5,10 @@
   width: 180px;
   margin: 0.35rem 0.5rem;
   flex-shrink: 0;
-  transition: border-color 200ms ease;
+  transition: 
+    border-color 200ms ease,
+    box-shadow 200ms ease,
+    transform 160ms var(--ease-out);
   /* Reserve space to prevent layout shift */
   min-height: 64px;
 }
@@ -16,6 +19,7 @@
 
 .clickable:hover {
   border-color: var(--text);
+  box-shadow: 0 4px 12px -4px oklch(from var(--text) l c h / 0.1);
 }
 
 .clickable:active {
