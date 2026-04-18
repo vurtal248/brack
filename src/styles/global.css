@@ -23,7 +23,7 @@ html {
 
 body {
   background: var(--bg);
-  background-image: 
+  background-image:
     radial-gradient(circle at top right, oklch(from var(--win) l c h / 0.08), transparent 40%),
     radial-gradient(circle at bottom left, oklch(from var(--win) l c h / 0.04), transparent 40%);
   background-attachment: fixed;
