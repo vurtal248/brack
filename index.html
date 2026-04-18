@@ -996,6 +996,22 @@
       display: none;
     }
 
+    .series-status {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      text-align: center;
+      padding: 0.25rem 0.5rem;
+      border-top: 1px solid var(--border);
+      background: var(--bg-2);
+      border-radius: 0 0 calc(var(--radius) - 1px) calc(var(--radius) - 1px);
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
     .seed-input {
       background: transparent;
       border: none;
@@ -2413,7 +2429,7 @@
         if (isEmpty) slot.classList.add('empty');
 
         let setsText = '';
-        if (match.sets && match.sets.length > 0) {
+        if (match.sets && match.sets.length === 1) {
           let scoreString = match.sets.map(s => slotIdx === 0 ? s.p1 : s.p2).join(' | ');
           setsText = `<span style="font-size:0.65rem; color:var(--text-dim); margin-left: auto; font-weight:700;">${scoreString}</span>`;
         }
@@ -2428,6 +2444,41 @@
 
         card.appendChild(slot);
       });
+
+      if (match.sets && match.sets.length > 1) {
+        let p1w = 0, p2w = 0;
+        match.sets.forEach(s => {
+          const a = parseFloat(s.p1), b = parseFloat(s.p2);
+          if (!isNaN(a) && !isNaN(b) && (a !== 0 || b !== 0)) {
+            if (a > b) p1w++;
+            else if (b > a) p2w++;
+          }
+        });
+
+        let seriesText = '';
+        const p1Name = getParticipantName(bracket, match.p1Id) || 'P1';
+        const p2Name = getParticipantName(bracket, match.p2Id) || 'P2';
+
+        if (match.winnerId != null) {
+          let winnerName = match.winnerId === match.p1Id ? p1Name : p2Name;
+          let winnerWins = match.winnerId === match.p1Id ? p1w : p2w;
+          let loserWins = match.winnerId === match.p1Id ? p2w : p1w;
+          seriesText = `${winnerName} WINS ${winnerWins}-${loserWins}`;
+        } else {
+          if (p1w > p2w) {
+            seriesText = `${p1Name} LEADS ${p1w}-${p2w}`;
+          } else if (p2w > p1w) {
+            seriesText = `${p2Name} LEADS ${p2w}-${p1w}`;
+          } else {
+            seriesText = `SERIES TIED ${p1w}-${p2w}`;
+          }
+        }
+
+        const seriesEl = document.createElement('div');
+        seriesEl.className = 'series-status';
+        seriesEl.textContent = seriesText.toUpperCase();
+        card.appendChild(seriesEl);
+      }
 
       return card;
     }
