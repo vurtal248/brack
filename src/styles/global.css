@@ -13,7 +13,7 @@
 
 *:focus-visible {
   outline: 2px solid var(--text);
-  outline-offset: 2px;
+  outline-offset: 4px;
 }
 
 html {
@@ -51,16 +51,20 @@ textarea {
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 0.5rem 0.75rem;
+  padding: 0.6rem 0.8rem;
   width: 100%;
   outline: none;
-  transition: border-color 200ms ease;
+  transition:
+    transform 150ms var(--ease-out),
+    border-color 150ms ease,
+    background-color 150ms ease;
 }
 
 input:focus,
 select:focus,
 textarea:focus {
   border-color: var(--text);
+  background: var(--bg-3);
 }
 
 select option {
