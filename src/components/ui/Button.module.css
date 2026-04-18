@@ -15,7 +15,8 @@
     opacity 200ms ease,
     background-color 200ms ease,
     border-color 200ms ease,
-    color 200ms ease;
+    color 200ms ease,
+    box-shadow 200ms ease;
 }
 
 .btn:active {
@@ -30,6 +31,7 @@
 
 .primary:hover {
   opacity: 0.85;
+  box-shadow: 0 4px 12px oklch(from var(--text) l c h / 0.15);
 }
 
 .ghost {
