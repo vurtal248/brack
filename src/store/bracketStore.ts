@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import type { Bracket } from './types'
-import { loadBrackets, upsertBracket, deleteBracket, getBracket } from './storage'
+import { loadBrackets, upsertBracket, deleteBracket } from './storage'
 import {
   createBracket,
   startBracket,
