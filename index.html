@@ -2396,7 +2396,7 @@
         const slot = document.createElement('div');
         slot.className = 'match-slot';
         let seedNum = '';
-        if (roundIdx === 0 && pid != null) {
+        if (pid != null) {
           const pIdx = bracket.participants.findIndex(p => p.id === pid);
           if (pIdx !== -1) {
             if (bracket.doubleSeed) {
@@ -2549,7 +2549,7 @@
       const p1Name = document.getElementById('score-p1-name').textContent;
       const p2Name = document.getElementById('score-p2-name').textContent;
       const getSeed = (pid) => {
-        if (currentScoreMatch.r === 0 && pid != null) {
+        if (pid != null) {
           const pIdx = bracket.participants.findIndex(p => p.id === pid);
           if (pIdx !== -1) {
             if (bracket.doubleSeed) {
