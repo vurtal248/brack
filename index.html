@@ -1394,6 +1394,12 @@
           Match</label>
       </div>
 
+      <div class="form-group" style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1rem;">
+        <input type="checkbox" id="input-bracket-doubleseed" style="width:auto; margin:0; padding:0;">
+        <label class="form-label" for="input-bracket-doubleseed" style="margin:0; cursor:pointer;">Double-sided Seeding
+          (e.g. 1st seed East/West)</label>
+      </div>
+
       <div class="form-group">
         <label class="form-label" for="input-bracket-tag">Sport / Category <span
             style="opacity:.5">(optional)</span></label>
@@ -1525,7 +1531,7 @@
     /* ============================================================
        BRACKET DATA MODEL
     ============================================================ */
-    function createBracket(name, count, tag, layout, include3rdPlace) {
+    function createBracket(name, count, tag, layout, include3rdPlace, doubleSeed) {
       const id = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36);
       const participants = Array.from({ length: count }, (_, i) => ({ id: i, name: '' }));
       return {
@@ -1534,6 +1540,7 @@
         tag: tag.trim(),
         layout: layout || 'single',
         include3rdPlace: !!include3rdPlace,
+        doubleSeed: !!doubleSeed,
         thirdPlaceMatch: include3rdPlace ? { p1Id: null, p2Id: null, winnerId: null, sets: [] } : null,
         createdAt: new Date().toISOString(),
         status: 'seeding',
@@ -1565,7 +1572,14 @@
       const paddedIds = bracket.participants.map(p => p.id);
       while (paddedIds.length < p2) paddedIds.push(null);
 
-      const seedOrder = getStandardSeeding(p2);
+      let seedOrder = getStandardSeeding(p2);
+      if (bracket.doubleSeed && p2 >= 2) {
+        const half = p2 / 2;
+        const halfOrder = getStandardSeeding(half);
+        seedOrder = [];
+        for (let i = 0; i < half; i++) seedOrder.push(halfOrder[i]);
+        for (let i = 0; i < half; i++) seedOrder.push(halfOrder[i] + half);
+      }
 
       const round1 = [];
       for (let i = 0; i < p2; i += 2) {
@@ -1885,6 +1899,8 @@
       document.getElementById('input-bracket-layout').value = 'single';
       const thirdPlaceEl = document.getElementById('input-bracket-3rd');
       if (thirdPlaceEl) thirdPlaceEl.checked = false;
+      const doubleSeedEl = document.getElementById('input-bracket-doubleseed');
+      if (doubleSeedEl) doubleSeedEl.checked = false;
       document.getElementById('create-modal').classList.add('open');
       setTimeout(() => document.getElementById('input-bracket-name').focus(), 100);
     }
@@ -1913,7 +1929,9 @@
       const tag = document.getElementById('input-bracket-tag').value.trim();
       const thirdPlaceEl = document.getElementById('input-bracket-3rd');
       const include3rdPlace = thirdPlaceEl ? thirdPlaceEl.checked : false;
-      const bracket = createBracket(name, count, tag, layout, include3rdPlace);
+      const doubleSeedEl = document.getElementById('input-bracket-doubleseed');
+      const doubleSeed = doubleSeedEl ? doubleSeedEl.checked : false;
+      const bracket = createBracket(name, count, tag, layout, include3rdPlace, doubleSeed);
       upsertBracket(bracket);
       closeCreateModal();
       openEditor(bracket.id);
@@ -2028,7 +2046,6 @@
     /* ── SEEDING CANVAS ── */
     function renderSeedingCanvas(bracket, canvas) {
       const count = bracket.participants.length;
-      const matchCount = count / 2;
 
       const col = document.createElement('div');
       col.className = 'round-col';
@@ -2038,34 +2055,90 @@
       matchesWrap.className = 'round-matches';
       matchesWrap.style.gap = '0.75rem';
 
-      // Standard seeding: 1v8, 2v7, etc.
-      for (let i = 0; i < matchCount; i++) {
-        const topSeed = i + 1;
-        const btmSeed = count - i;
-        const topP = bracket.participants[i];
-        const btmP = bracket.participants[count - 1 - i];
+      if (bracket.doubleSeed) {
+        const half = Math.ceil(count / 2);
+        const matchesA = Math.ceil(half / 2);
+        const rem = count - half;
+        const matchesB = Math.ceil(rem / 2);
 
-        const card = document.createElement('div');
-        card.className = 'match-card';
-        card.style.margin = '0.25rem 0.5rem';
-        card.innerHTML = `
-        <div class="match-slot" data-pid="${topP.id}" data-match-idx="${i}" data-slot="0">
-          <span class="slot-seed">${topSeed}</span>
-          <input class="seed-input" type="text" placeholder="Enter name…"
-            value="${escHtml(topP.name)}"
-            maxlength="30"
-            data-pid="${topP.id}"
-            aria-label="Seed ${topSeed} participant name" />
-        </div>
-        <div class="match-slot" data-pid="${btmP.id}" data-match-idx="${i}" data-slot="1">
-          <span class="slot-seed">${btmSeed}</span>
-          <input class="seed-input" type="text" placeholder="Enter name…"
-            value="${escHtml(btmP.name)}"
-            maxlength="30"
-            data-pid="${btmP.id}"
-            aria-label="Seed ${btmSeed} participant name" />
-        </div>`;
-        matchesWrap.appendChild(card);
+        // Conf A
+        for (let i = 0; i < matchesA; i++) {
+          const topSeed = i + 1;
+          const btmSeed = half - i;
+          const topP = bracket.participants[i];
+          const btmP = bracket.participants[half - 1 - i];
+
+          const card = document.createElement('div');
+          card.className = 'match-card';
+          card.style.margin = '0.25rem 0.5rem';
+          card.innerHTML = `
+          <div class="match-slot" data-pid="${topP.id}">
+            <span class="slot-seed">${topSeed}</span>
+            <input class="seed-input" type="text" placeholder="Enter name…"
+              value="${escHtml(topP.name)}" maxlength="30" data-pid="${topP.id}" />
+          </div>
+          ${topP.id !== btmP.id ? `
+          <div class="match-slot" data-pid="${btmP.id}">
+            <span class="slot-seed">${btmSeed}</span>
+            <input class="seed-input" type="text" placeholder="Enter name…"
+              value="${escHtml(btmP.name)}" maxlength="30" data-pid="${btmP.id}" />
+          </div>` : ''}`;
+          matchesWrap.appendChild(card);
+        }
+
+        // Conf B
+        for (let i = 0; i < matchesB; i++) {
+          const topSeed = i + 1;
+          const btmSeed = rem - i;
+          const topP = bracket.participants[half + i];
+          const btmP = bracket.participants[count - 1 - i];
+
+          const card = document.createElement('div');
+          card.className = 'match-card';
+          card.style.margin = '0.25rem 0.5rem';
+          card.innerHTML = `
+          <div class="match-slot" data-pid="${topP.id}">
+            <span class="slot-seed">${topSeed}</span>
+            <input class="seed-input" type="text" placeholder="Enter name…"
+              value="${escHtml(topP.name)}" maxlength="30" data-pid="${topP.id}" />
+          </div>
+          ${topP.id !== btmP.id ? `
+          <div class="match-slot" data-pid="${btmP.id}">
+            <span class="slot-seed">${btmSeed}</span>
+            <input class="seed-input" type="text" placeholder="Enter name…"
+              value="${escHtml(btmP.name)}" maxlength="30" data-pid="${btmP.id}" />
+          </div>` : ''}`;
+          matchesWrap.appendChild(card);
+        }
+      } else {
+        // Standard seeding: 1v8, 2v7, etc.
+        for (let i = 0; i < Math.ceil(count / 2); i++) {
+          const topSeed = i + 1;
+          const btmSeed = count - i;
+          const topP = bracket.participants[i];
+          const btmP = bracket.participants[count - 1 - i];
+
+          const card = document.createElement('div');
+          card.className = 'match-card';
+          card.style.margin = '0.25rem 0.5rem';
+          card.innerHTML = `
+          <div class="match-slot" data-pid="${topP.id}">
+            <span class="slot-seed">${topSeed}</span>
+            <input class="seed-input" type="text" placeholder="Enter name…"
+              value="${escHtml(topP.name)}"
+              maxlength="30"
+              data-pid="${topP.id}" />
+          </div>
+          ${topP.id !== btmP.id ? `
+          <div class="match-slot" data-pid="${btmP.id}">
+            <span class="slot-seed">${btmSeed}</span>
+            <input class="seed-input" type="text" placeholder="Enter name…"
+              value="${escHtml(btmP.name)}"
+              maxlength="30"
+              data-pid="${btmP.id}" />
+          </div>` : ''}`;
+          matchesWrap.appendChild(card);
+        }
       }
 
       col.appendChild(matchesWrap);
@@ -2313,7 +2386,14 @@
         let seedNum = '';
         if (roundIdx === 0 && pid != null) {
           const pIdx = bracket.participants.findIndex(p => p.id === pid);
-          seedNum = pIdx !== -1 ? (pIdx + 1) : '';
+          if (pIdx !== -1) {
+            if (bracket.doubleSeed) {
+              const half = Math.ceil(bracket.participants.length / 2);
+              seedNum = pIdx < half ? (pIdx + 1) : (pIdx - half + 1);
+            } else {
+              seedNum = pIdx + 1;
+            }
+          }
         }
 
         if (isWinner) slot.classList.add('winner');
@@ -2456,20 +2536,21 @@
       const match = (currentScoreMatch.r === '3rd') ? bracket.thirdPlaceMatch : bracket.rounds[currentScoreMatch.r][currentScoreMatch.m];
       const p1Name = document.getElementById('score-p1-name').textContent;
       const p2Name = document.getElementById('score-p2-name').textContent;
-      const p1Seed = (() => {
-        if (currentScoreMatch.r === 0 && match.p1Id != null) {
-          const pIdx = bracket.participants.findIndex(p => p.id === match.p1Id);
-          return pIdx !== -1 ? pIdx + 1 : '';
+      const getSeed = (pid) => {
+        if (currentScoreMatch.r === 0 && pid != null) {
+          const pIdx = bracket.participants.findIndex(p => p.id === pid);
+          if (pIdx !== -1) {
+            if (bracket.doubleSeed) {
+              const half = Math.ceil(bracket.participants.length / 2);
+              return pIdx < half ? (pIdx + 1) : (pIdx - half + 1);
+            }
+            return pIdx + 1;
+          }
         }
         return '';
-      })();
-      const p2Seed = (() => {
-        if (currentScoreMatch.r === 0 && match.p2Id != null) {
-          const pIdx = bracket.participants.findIndex(p => p.id === match.p2Id);
-          return pIdx !== -1 ? pIdx + 1 : '';
-        }
-        return '';
-      })();
+      };
+      const p1Seed = getSeed(match.p1Id);
+      const p2Seed = getSeed(match.p2Id);
 
       const s = matchSets[currentSetIdx] || { p1: '', p2: '' };
       const p1Checked = document.getElementById('score-p1-radio').checked;
