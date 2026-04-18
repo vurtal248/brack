@@ -1569,16 +1569,28 @@
       while (p2 < count) p2 *= 2;
 
       const totalRounds = Math.log2(p2);
-      const paddedIds = bracket.participants.map(p => p.id);
-      while (paddedIds.length < p2) paddedIds.push(null);
+      let paddedIds = [];
 
       let seedOrder = getStandardSeeding(p2);
       if (bracket.doubleSeed && p2 >= 2) {
-        const half = p2 / 2;
-        const halfOrder = getStandardSeeding(half);
+        const halfCount = Math.ceil(count / 2);
+        const p2Half = p2 / 2;
+        
+        // Conf A
+        for (let i = 0; i < halfCount; i++) paddedIds.push(bracket.participants[i].id);
+        while (paddedIds.length < p2Half) paddedIds.push(null);
+        
+        // Conf B
+        for (let i = halfCount; i < count; i++) paddedIds.push(bracket.participants[i].id);
+        while (paddedIds.length < p2) paddedIds.push(null);
+
+        const halfOrder = getStandardSeeding(p2Half);
         seedOrder = [];
-        for (let i = 0; i < half; i++) seedOrder.push(halfOrder[i]);
-        for (let i = 0; i < half; i++) seedOrder.push(halfOrder[i] + half);
+        for (let i = 0; i < p2Half; i++) seedOrder.push(halfOrder[i]);
+        for (let i = 0; i < p2Half; i++) seedOrder.push(halfOrder[i] + p2Half);
+      } else {
+        paddedIds = bracket.participants.map(p => p.id);
+        while (paddedIds.length < p2) paddedIds.push(null);
       }
 
       const round1 = [];
