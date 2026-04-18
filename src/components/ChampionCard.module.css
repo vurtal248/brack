@@ -20,11 +20,18 @@
   align-items: center;
   gap: 0.25rem;
   min-width: 140px;
-  transition: border-color 300ms ease;
+  transition: border-color 300ms ease, box-shadow 300ms ease;
 }
 
 .crowned {
   border: 2px solid var(--win);
+  box-shadow: 0 0 24px -6px var(--win-glow), inset 0 0 10px -5px var(--win-glow);
+  animation: float 3s var(--ease-in-out) infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-4px) scale(1.01); }
 }
 
 .tbd {
