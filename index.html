@@ -2764,10 +2764,14 @@
         } else {
           // One (or both) is a bye — draw a single straight line from the real
           // match card directly to the next-round card, skipping the merge arm.
+          if (topIsBye && btmIsBye) {
+            // Both are byes — they natively progress, no cards exist here to draw lines from.
+            continue;
+          }
+
           const realMatchEl = topIsBye ? btmMatchEl : topMatchEl;
           const realM = topIsBye ? btmM : topM;
           if (!realMatchEl) {
-            // Both are byes — nothing to draw
             continue;
           }
           const realRect = realMatchEl.getBoundingClientRect();
