@@ -1575,11 +1575,11 @@
       if (bracket.doubleSeed && p2 >= 2) {
         const halfCount = Math.ceil(count / 2);
         const p2Half = p2 / 2;
-        
+
         // Conf A
         for (let i = 0; i < halfCount; i++) paddedIds.push(bracket.participants[i].id);
         while (paddedIds.length < p2Half) paddedIds.push(null);
-        
+
         // Conf B
         for (let i = halfCount; i < count; i++) paddedIds.push(bracket.participants[i].id);
         while (paddedIds.length < p2) paddedIds.push(null);
