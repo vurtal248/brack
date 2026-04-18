@@ -39,9 +39,9 @@
   --font-display: 'Chivo', sans-serif;
   --font-mono: 'Chivo Mono', monospace;
 
-  /* Motion — named easing curves */
-  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  /* Motion — Snappy, mechanical easing curves */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);     /* Snappy expo-like ease-out */
+  --ease-in-out: cubic-bezier(0.83, 0, 0.17, 1); /* Sharp acceleration/deceleration */
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
-  --transition: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition: 0.15s var(--ease-out);
 }
