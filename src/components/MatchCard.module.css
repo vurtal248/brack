@@ -6,9 +6,9 @@
   margin: 0.35rem 0.5rem;
   flex-shrink: 0;
   transition: 
-    border-color 200ms ease,
-    box-shadow 200ms ease,
-    transform 160ms var(--ease-out);
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms var(--ease-out);
   /* Reserve space to prevent layout shift */
   min-height: 64px;
 }
@@ -34,7 +34,7 @@
   padding: 0.4rem 0.5rem;
   min-height: 32px;
   border-bottom: 1px solid transparent;
-  transition: background-color 200ms ease;
+  transition: background-color 150ms ease;
 }
 
 .slot:first-of-type {
@@ -42,10 +42,7 @@
 }
 
 .winner {
-  background: var(--bg-2);
-  border-left: 3px solid var(--win);
-  margin-left: -1px;
-  padding-left: calc(0.5rem - 2px);
+  background: oklch(from var(--win) l c h / 0.12);
 }
 
 .winner .name {
