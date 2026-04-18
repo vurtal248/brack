@@ -1,0 +1,43 @@
+.formGroup {
+  margin-bottom: 1rem;
+}
+
+.label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 0.4rem;
+}
+
+.optional {
+  opacity: 0.5;
+}
+
+.checkRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.8rem;
+}
+
+.checkRow input[type='checkbox'] {
+  width: auto;
+  padding: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.checkRow label {
+  cursor: pointer;
+  color: var(--text);
+}
+
+.footer {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}

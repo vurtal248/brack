@@ -1,0 +1,97 @@
+/* ============================================================
+   GLOBAL STYLES — Brack V2
+   ============================================================ */
+@import './tokens.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+button {
+  cursor: pointer;
+  font-family: var(--font-display);
+  border: none;
+  background: none;
+}
+
+input,
+select,
+textarea {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  background: var(--bg-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.75rem;
+  width: 100%;
+  outline: none;
+  transition: border-color 200ms ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--text);
+}
+
+select option {
+  background: var(--bg-2);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-hi);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-dim);
+}
+
+/* Number input — hide native spin buttons */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+.hidden {
+  display: none !important;
+}

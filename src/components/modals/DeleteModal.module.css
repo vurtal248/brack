@@ -1,0 +1,16 @@
+.body {
+  font-size: 0.8rem;
+  margin: 0.5rem 0 1rem;
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.body strong {
+  color: var(--text);
+}
+
+.footer {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}

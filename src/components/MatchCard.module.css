@@ -1,0 +1,118 @@
+.card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  width: 180px;
+  margin: 0.35rem 0.5rem;
+  flex-shrink: 0;
+  transition: border-color 200ms ease;
+  /* Reserve space to prevent layout shift */
+  min-height: 64px;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover {
+  border-color: var(--text);
+}
+
+.clickable:active {
+  transform: scale(0.98);
+}
+
+/* Slots */
+.slot {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.5rem;
+  min-height: 32px;
+  border-bottom: 1px solid transparent;
+  transition: background-color 200ms ease;
+}
+
+.slot:first-of-type {
+  border-bottom: 1px solid var(--border);
+}
+
+.winner {
+  background: var(--bg-2);
+  border-left: 3px solid var(--win);
+  margin-left: -1px;
+  padding-left: calc(0.5rem - 2px);
+}
+
+.winner .name {
+  color: var(--win);
+  font-weight: 700;
+}
+
+.winner .seed {
+  color: var(--win);
+  opacity: 1;
+}
+
+.eliminated .name {
+  color: var(--text-dim);
+  text-decoration: line-through;
+}
+
+.empty {
+  opacity: 0.3;
+}
+
+/* Slot internals */
+.seed {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  min-width: 14px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.name {
+  font-size: 0.75rem;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+.unnamed {
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+.score {
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  font-weight: 700;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.winIcon {
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+/* Series status bar */
+.series {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  text-align: center;
+  padding: 0.25rem 0.5rem;
+  border-top: 1px solid var(--border);
+  background: var(--bg-2);
+  border-radius: 0 0 calc(var(--radius) - 1px) calc(var(--radius) - 1px);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

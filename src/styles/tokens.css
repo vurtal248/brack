@@ -1,0 +1,47 @@
+/* ============================================================
+   DESIGN TOKENS — Brack V2
+   All color values use OKLCH for perceptual uniformity.
+   Easing curves match the motion design philosophy.
+   ============================================================ */
+:root {
+  color-scheme: light dark;
+
+  /* Backgrounds */
+  --bg: light-dark(oklch(0.98 0.01 250), oklch(0.10 0.01 250));
+  --bg-2: light-dark(oklch(1.00 0.005 250), oklch(0.13 0.01 250));
+  --bg-3: light-dark(oklch(0.95 0.01 250), oklch(0.18 0.01 250));
+
+  /* Borders */
+  --border: light-dark(oklch(0.85 0.01 250), oklch(0.25 0.01 250));
+  --border-hi: light-dark(oklch(0.70 0.01 250), oklch(0.35 0.01 250));
+
+  /* Typography */
+  --text: light-dark(oklch(0.20 0.01 250), oklch(0.90 0.01 250));
+  --text-dim: light-dark(oklch(0.40 0.01 250), oklch(0.65 0.01 250));
+
+  /* Accent (inverted fg/bg) */
+  --accent: light-dark(oklch(0.30 0.01 250), oklch(0.80 0.01 250));
+  --accent-dim: light-dark(oklch(0.93 0.01 250), oklch(0.20 0.01 250));
+
+  /* Win state */
+  --win: light-dark(oklch(0.15 0.01 250), oklch(0.95 0.01 250));
+  --win-glow: light-dark(oklch(0.92 0.01 250), oklch(0.25 0.01 250));
+
+  /* Danger */
+  --danger: light-dark(oklch(0.45 0.02 20), oklch(0.65 0.02 20));
+  --danger-dim: light-dark(oklch(0.95 0.01 20), oklch(0.18 0.01 20));
+
+  /* Shape */
+  --radius: 2px;
+  --radius-lg: 4px;
+
+  /* Typography */
+  --font-display: 'Chivo', sans-serif;
+  --font-mono: 'Chivo Mono', monospace;
+
+  /* Motion — named easing curves */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --transition: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
