@@ -2772,7 +2772,13 @@
           }
           const realRect = realMatchEl.getBoundingClientRect();
           const x0 = isReversed ? realRect.left - colRect.left : realRect.right - colRect.left;
-          const y1 = realRect.top + realRect.height / 2 - colRect.top;
+          let y1 = realRect.top + realRect.height / 2 - colRect.top;
+          let yDst = nxtRect.top + nxtRect.height / 2 - colRect.top;
+
+          // Snap yDst to y1 if they are near-identical to prevent disjointed 1-2px S-curves
+          if (Math.abs(yDst - y1) <= 4) {
+            yDst = y1;
+          }
 
           const won = realM?.winnerId != null;
           const cssVar = won ? 'var(--win)' : 'var(--border)';
@@ -2817,8 +2823,13 @@
         xEnd = nxtRect.right - colRect.left;
       }
 
-      const y1 = topRect.top + topRect.height / 2 - colRect.top;
-      const yEnd = nxtRect.top + nxtRect.height / 2 - colRect.top;
+      let y1 = topRect.top + topRect.height / 2 - colRect.top;
+      let yEnd = nxtRect.top + nxtRect.height / 2 - colRect.top;
+
+      // Snap yEnd to y1 if they are near-identical to prevent disjointed 1-2px S-curves
+      if (Math.abs(yEnd - y1) <= 4) {
+        yEnd = y1;
+      }
 
       const topWon = bracket.rounds[r][m]?.winnerId != null;
 
