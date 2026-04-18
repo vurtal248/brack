@@ -2749,7 +2749,8 @@
 
           // Rounded-corner bracket arms:
           // travel horizontal, Q-arc around the 90° elbow, drop vertical to yMid, exit horizontal
-          const r = 8;
+          const maxR = Math.min(8, xMid);
+          const r = Math.min(maxR, Math.abs(yMid - y1));
           const cx = isReversed ? xMid + r : xMid - r; // approach elbow from arm side
           const topVDir = yMid >= y1 ? r : -r;          // which way the top arm bends vertically
           const btmVDir = yMid <= y2 ? -r : r;          // bottom arm bends the other way
@@ -2778,7 +2779,8 @@
           const sw = won ? '1.5' : '1';
 
           // Bye: two rounded elbows — horizontal → arc → vertical → arc → horizontal
-          const r = 8;
+          const maxR = Math.min(8, xMid);
+          const r = Math.min(maxR, Math.abs(yDst - y1) / 2);
           const vDir = yDst >= y1 ? 1 : -1;
           const c1x = isReversed ? xMid + r : xMid - r; // elbow 1: arm bends into spine
           const c2x = isReversed ? xMid - r : xMid + r; // elbow 2: spine bends toward exit
@@ -2825,7 +2827,8 @@
 
       // Semi-final → final: two rounded elbows
       const xMid = colRect.width / 2;
-      const cr = 8;
+      const maxR = Math.min(8, xMid);
+      const cr = Math.min(maxR, Math.abs(yEnd - y1) / 2);
       const vDir = yEnd >= y1 ? 1 : -1;
       const c1x = isReversed ? xMid + cr : xMid - cr;
       const c2x = isReversed ? xMid - cr : xMid + cr;
