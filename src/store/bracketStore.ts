@@ -89,7 +89,7 @@ export const useAppStore = create<AppState>((set, get) => {
 
     getActiveBracket: () => {
       const id = get().activeBracketId
-      return id ? getBracket(id) : null
+      return id ? get().brackets.find((b) => b.id === id) ?? null : null
     },
 
     goHome: () => set({ view: 'home', activeBracketId: null, brackets: loadBrackets() }),
@@ -132,12 +132,14 @@ export const useAppStore = create<AppState>((set, get) => {
         participants: b.participants.map((p) => (p.id === pid ? { ...p, name } : p)),
       }
       upsertBracket(updated)
+      set({ brackets: loadBrackets() })
     },
 
     randomizeSeeds: () => {
       const b = get().getActiveBracket()
       if (!b) return
       upsertBracket(shuffleParticipants(b))
+      set({ brackets: loadBrackets() })
     },
 
     startBracket: () => {
@@ -152,12 +154,14 @@ export const useAppStore = create<AppState>((set, get) => {
         })),
       }
       upsertBracket(startBracket(withDefaults))
+      set({ brackets: loadBrackets() })
     },
 
     resetBracket: () => {
       const b = get().getActiveBracket()
       if (!b) return
       upsertBracket(resetBracket(b))
+      set({ brackets: loadBrackets() })
     },
 
     recordWinner: (roundIdx, matchIdx, winnerId) => {
@@ -172,6 +176,7 @@ export const useAppStore = create<AppState>((set, get) => {
       }
       b = updateBracketStatus(b)
       upsertBracket(b)
+      set({ brackets: loadBrackets() })
     },
 
     saveMatchSets: (roundIdx, matchIdx, sets, winnerId) => {
@@ -198,6 +203,7 @@ export const useAppStore = create<AppState>((set, get) => {
       }
       b = updateBracketStatus(b)
       upsertBracket(b)
+      set({ brackets: loadBrackets() })
     },
   }
 })
