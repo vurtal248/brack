@@ -1,0 +1,104 @@
+.container {
+  position: relative;
+  width: 100%;
+}
+
+.trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.65rem; /* Matched to compact inputs */
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text);
+  background: var(--bg-2);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  outline: none;
+  transition: 
+    background-color 200ms var(--ease-out),
+    border-color 200ms var(--ease-out),
+    box-shadow 200ms var(--ease-out);
+}
+
+.trigger:focus-visible,
+.trigger:hover {
+  background: var(--bg);
+  border-color: var(--text);
+}
+
+.trigger[data-open="true"] {
+  background: var(--bg);
+  border-color: var(--text);
+  box-shadow: 0 0 0 4px var(--border-hi);
+}
+
+.icon {
+  transition: transform 200ms var(--ease-spring), opacity 200ms ease;
+  opacity: 0.5;
+}
+
+.iconOpen {
+  transform: rotate(180deg);
+  opacity: 1;
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  left: 0;
+  right: 0;
+  background: var(--bg-glass);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 100;
+  box-shadow: var(--shadow-hover);
+  animation: slideDown 200ms var(--ease-out);
+  transform-origin: top center;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.35rem 0.5rem;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-dim);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: 
+    color 150ms ease,
+    background-color 150ms ease;
+}
+
+.option:hover {
+  color: var(--text);
+  background-color: var(--bg-3);
+}
+
+.option[data-selected="true"] {
+  color: var(--text);
+  background-color: var(--bg-2);
+}
