@@ -1,47 +1,49 @@
+/* ── Modal — Elevated Glass Window ───────────────────────────── */
+
 .backdrop {
   display: none;
   position: fixed;
   inset: 0;
-  background: oklch(from var(--bg) l c h / 0.8);
+  background: var(--bg-glass);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   z-index: 200;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  padding: var(--space-4);
   opacity: 0;
-  backdrop-filter: blur(0px);
   transition:
-    opacity 250ms var(--ease-out),
-    backdrop-filter 250ms var(--ease-out),
-    display 250ms var(--ease-out) allow-discrete;
+    opacity  300ms var(--ease-out),
+    display  300ms var(--ease-out) allow-discrete;
 }
 
 .open {
   display: flex;
   opacity: 1;
-  backdrop-filter: blur(4px);
 
   @starting-style {
     opacity: 0;
-    backdrop-filter: blur(0px);
   }
 }
 
 .modal {
-  background: var(--bg-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 2rem;
+  background: var(--bg);
+  border: var(--border-width) solid var(--border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-hover);
   width: 100%;
-  transform: scale(0.96) translateY(4px);
-  transition: transform 250ms var(--ease-out);
+  max-width: 440px;
+  transform: scale(0.95) translateY(10px);
+  transition: transform 400ms var(--ease-spring);
   transform-origin: center center;
+  overflow: hidden;
 }
 
 .open .modal {
   transform: scale(1) translateY(0);
 
   @starting-style {
-    transform: scale(0.96) translateY(4px);
+    transform: scale(0.95) translateY(10px);
   }
 }
 
@@ -49,21 +51,26 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1.5rem;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 0.75rem;
+  padding: var(--space-5) var(--space-6) var(--space-4);
 }
 
 .title {
   font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.1rem;
-  text-transform: uppercase;
+  font-weight: 800;
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.body {
+  padding: 0 var(--space-6) var(--space-6);
 }
 
 .footer {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--space-3);
   justify-content: flex-end;
-  margin-top: 1.5rem;
+  padding: var(--space-4) var(--space-6);
+  background: var(--bg-2);
+  border-top: var(--border-width) solid var(--border);
 }
