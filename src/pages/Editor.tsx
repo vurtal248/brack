@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
 import { useAppStore } from '@/store/bracketStore'
 import { BracketViewer } from '@/components/BracketViewer'
 import { Button } from '@/components/ui/Button'
@@ -10,9 +11,15 @@ export function Editor() {
   const goHome = useAppStore((s) => s.goHome)
   const bracket = useAppStore((s) => s.getActiveBracket())
   const updateParticipantName = useAppStore((s) => s.updateParticipantName)
+  const reorderParticipants = useAppStore((s) => s.reorderParticipants)
   const randomizeSeeds = useAppStore((s) => s.randomizeSeeds)
   const startBracket = useAppStore((s) => s.startBracket)
   const resetBracket = useAppStore((s) => s.resetBracket)
+
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination) return
+    reorderParticipants(result.source.index, result.destination.index)
+  }
 
   // Score Modal state
   const [scoreModal, setScoreModal] = useState<{ open: boolean; r: number | '3rd' | null; m: number | null }>({
@@ -79,28 +86,55 @@ export function Editor() {
         {isSeeding ? (
           <div className={styles.seedingView}>
             <div className={styles.seedGrid}>
-              {bracket.participants.map((p, i) => {
-                const seedNum = getSeedNumber(bracket, p.id)
-                // If double-seeded, draw a visual divider between conferences
-                const showDivider = bracket.doubleSeed && i === halfCount && i > 0
+              {/* Column label header */}
+              <div className={styles.seedHeader} aria-hidden="true">
+                <span />
+                <span style={{ textAlign: 'right' }}>#</span>
+                <span>Name</span>
+              </div>
 
-                return (
-                  <div key={p.id} style={{ display: 'contents' }}>
-                    {showDivider && (
-                      <div className={styles.confDivider}>
-                        <span>Conference B</span>
-                      </div>
-                    )}
-                    <ParticipantRow
-                      pid={p.id}
-                      name={p.name}
-                      seed={seedNum}
-                      onChange={(val) => updateParticipantName(p.id, val)}
-                      autoFocus={i === 0 && !p.name}
-                    />
-                  </div>
-                )
-              })}
+              <DragDropContext onDragEnd={handleDragEnd}>
+                <Droppable droppableId="seeding-list">
+                  {(provided) => (
+                    <div
+                      className={styles.dropList}
+                      {...provided.droppableProps}
+                      ref={provided.innerRef}
+                    >
+                      {bracket.participants.map((p, i) => {
+                        const seedNum = getSeedNumber(bracket, p.id)
+                        const showDivider = bracket.doubleSeed && i === halfCount && i > 0
+
+                        return (
+                          <div key={p.id} style={{ display: 'contents' }}>
+                            {showDivider && (
+                              <div className={styles.confDivider}>
+                                <span>Conference B</span>
+                              </div>
+                            )}
+                            <Draggable draggableId={p.id.toString()} index={i}>
+                              {(provided, snapshot) => (
+                                <ParticipantRow
+                                  pid={p.id}
+                                  name={p.name}
+                                  seed={seedNum}
+                                  onChange={(val) => updateParticipantName(p.id, val)}
+                                  autoFocus={i === 0 && !p.name}
+                                  innerRef={provided.innerRef}
+                                  draggableProps={provided.draggableProps}
+                                  dragHandleProps={provided.dragHandleProps}
+                                  isDragging={snapshot.isDragging}
+                                />
+                              )}
+                            </Draggable>
+                          </div>
+                        )
+                      })}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </DragDropContext>
             </div>
           </div>
         ) : (
@@ -122,12 +156,16 @@ export function Editor() {
   )
 }
 
-function ParticipantRow({ pid, name, seed, onChange, autoFocus }: {
+function ParticipantRow({ pid, name, seed, onChange, autoFocus, innerRef, draggableProps, dragHandleProps, isDragging }: {
   pid: number
   name: string
   seed: number | ''
   onChange: (val: string) => void
   autoFocus?: boolean
+  innerRef?: (element?: HTMLElement | null) => void
+  draggableProps?: any
+  dragHandleProps?: any
+  isDragging?: boolean
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -138,7 +176,14 @@ function ParticipantRow({ pid, name, seed, onChange, autoFocus }: {
   }, [autoFocus])
 
   return (
-    <div className={styles.pRow}>
+    <div
+      className={`${styles.pRow} ${isDragging ? styles.isDragging : ''}`}
+      ref={innerRef}
+      {...draggableProps}
+    >
+      <div className={styles.dragHandle} {...dragHandleProps}>
+        <DragIcon />
+      </div>
       <div className={styles.pSeed}>{seed}</div>
       <input
         ref={inputRef}
@@ -151,6 +196,16 @@ function ParticipantRow({ pid, name, seed, onChange, autoFocus }: {
         autoComplete="off"
       />
     </div>
+  )
+}
+
+function DragIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true" stroke="currentColor" strokeWidth="2">
+      <circle cx="9" cy="5" r="1.5"></circle><circle cx="15" cy="5" r="1.5"></circle>
+      <circle cx="9" cy="12" r="1.5"></circle><circle cx="15" cy="12" r="1.5"></circle>
+      <circle cx="9" cy="19" r="1.5"></circle><circle cx="15" cy="19" r="1.5"></circle>
+    </svg>
   )
 }
 
