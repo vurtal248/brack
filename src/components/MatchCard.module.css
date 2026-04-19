@@ -1,16 +1,21 @@
+/* ── MatchCard — Float Glass Cell ────────────────────────────── */
+
 .card {
-  background: var(--bg);
-  border: 1px solid var(--border);
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: var(--border-width) solid var(--border);
   border-radius: var(--radius);
-  width: 180px;
+  box-shadow: var(--shadow-sm);
+  width: 200px;
   margin: 0.35rem 0.5rem;
   flex-shrink: 0;
-  transition: 
-    border-color 150ms ease,
-    box-shadow 150ms ease,
-    transform 150ms var(--ease-out);
-  /* Reserve space to prevent layout shift */
-  min-height: 64px;
+  transition:
+    border-color 300ms var(--ease-fluid),
+    box-shadow   300ms var(--ease-fluid),
+    transform    200ms var(--ease-spring);
+  min-height: 72px;
+  overflow: hidden; /* clips the slots */
 }
 
 .clickable {
@@ -18,56 +23,60 @@
 }
 
 .clickable:hover {
-  border-color: var(--text);
-  box-shadow: 0 4px 12px -4px oklch(from var(--text) l c h / 0.1);
+  border-color: var(--border-hi);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
 }
 
 .clickable:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
+  box-shadow: var(--shadow-active);
 }
 
-/* Slots */
+/* ── Slots ───────────────────────────────────────────────────── */
 .slot {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.4rem 0.5rem;
-  min-height: 32px;
-  border-bottom: 1px solid transparent;
-  transition: background-color 150ms ease;
+  gap: var(--space-2);
+  padding: 0.65rem 0.75rem;
+  min-height: 40px;
+  transition: background-color 300ms ease;
 }
 
+/* Dim hairline separator */
 .slot:first-of-type {
-  border-bottom: 1px solid var(--border);
+  border-bottom: var(--border-width) solid var(--border);
 }
 
+/* Winner: Soft elevated status */
 .winner {
-  background: oklch(from var(--win) l c h / 0.12);
+  background: var(--bg-2);
 }
 
 .winner .name {
-  color: var(--win);
+  color: var(--text);
   font-weight: 700;
 }
 
-.winner .seed {
-  color: var(--win);
-  opacity: 1;
+/* Loser: transparent, washed out */
+.eliminated {
+  background: transparent;
 }
 
 .eliminated .name {
   color: var(--text-dim);
-  text-decoration: line-through;
 }
 
+/* Empty */
 .empty {
-  opacity: 0.3;
+  opacity: 0.4;
 }
 
-/* Slot internals */
+/* ── Slot internals ──────────────────────────────────────────── */
 .seed {
-  font-size: 0.6rem;
-  font-weight: 700;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 600;
   color: var(--text-dim);
   min-width: 14px;
   text-align: right;
@@ -75,44 +84,51 @@
 }
 
 .name {
-  font-size: 0.75rem;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 500;
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: var(--text);
+  color: var(--text-sub);
+  letter-spacing: -0.01em;
 }
 
 .unnamed {
   color: var(--text-dim);
-  font-style: italic;
+  font-weight: 400;
+  font-size: 0.8rem;
 }
 
 .score {
-  font-size: 0.65rem;
-  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
   font-weight: 700;
+  color: var(--text);
   margin-left: auto;
   flex-shrink: 0;
+  background: var(--bg-3);
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--radius-sm);
 }
 
 .winIcon {
-  opacity: 0.5;
   flex-shrink: 0;
+  color: var(--primary);
+  filter: drop-shadow(0 0 8px var(--primary-glow));
 }
 
-/* Series status bar */
+/* ── Series status bar ───────────────────────────────────────── */
 .series {
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: var(--text-dim);
-  text-transform: uppercase;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--text-sub);
   text-align: center;
-  padding: 0.25rem 0.5rem;
-  border-top: 1px solid var(--border);
-  background: var(--bg-2);
-  border-radius: 0 0 calc(var(--radius) - 1px) calc(var(--radius) - 1px);
-  letter-spacing: 0.05em;
+  padding: 0.35rem 0.5rem;
+  background: var(--bg-3);
+  border-top: var(--border-width) solid var(--border);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
