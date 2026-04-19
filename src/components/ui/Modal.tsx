@@ -10,7 +10,7 @@ interface ModalProps {
   maxWidth?: number
 }
 
-export function Modal({ open, onClose, title, children, maxWidth = 420 }: ModalProps) {
+export function Modal({ open, onClose, title, children, maxWidth = 340 }: ModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null)
 
   // Close on Escape
