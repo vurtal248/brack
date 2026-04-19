@@ -1,105 +1,70 @@
-/* ============================================================
-   GLOBAL STYLES — Brack V2
-   ============================================================ */
 @import './tokens.css';
 
-*,
-*::before,
-*::after {
+* {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-*:focus-visible {
-  outline: 2px solid var(--text);
-  outline-offset: 4px;
-}
-
-html {
-  font-size: 16px;
-  scroll-behavior: smooth;
-}
-
 body {
   background: var(--bg);
-  background-image:
-    radial-gradient(circle at top right, oklch(from var(--win) l c h / 0.08), transparent 40%),
-    radial-gradient(circle at bottom left, oklch(from var(--win) l c h / 0.04), transparent 40%);
-  background-attachment: fixed;
+  /* Pure achromatic solid background — absolutely no gradients, glowing auras or textures */
   color: var(--text);
-  font-family: var(--font-mono);
-  font-size: 0.875rem;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
   line-height: 1.6;
   min-height: 100dvh;
   overflow-x: hidden;
+  /* Prevent text jumping on OS level layout reflows */
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-button {
-  cursor: pointer;
-  font-family: var(--font-display);
-  border: none;
-  background: none;
+/* ── Tactile Noise Overlay ────────────────────────────────────── */
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+  background-image: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+  opacity: 0.035;
 }
 
-input,
-select,
-textarea {
-  font-family: var(--font-mono);
-  font-size: 0.875rem;
-  background: var(--bg-2);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 0.6rem 0.8rem;
-  width: 100%;
-  outline: none;
-  transition:
-    transform 150ms var(--ease-out),
-    border-color 150ms ease,
-    background-color 150ms ease;
-}
-
-input:focus,
-select:focus,
-textarea:focus {
-  border-color: var(--text);
-  background: var(--bg-3);
-}
-
-select option {
-  background: var(--bg-2);
-}
-
-/* Scrollbar */
+/* Base custom scrollbar for that premium feel */
 ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
   background: var(--border-hi);
+  border: 2px solid var(--bg);
+  border-radius: var(--radius-pill);
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: var(--text-dim);
+::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
-/* Number input — hide native spin buttons */
-input[type='number']::-webkit-outer-spin-button,
-input[type='number']::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+/* Focus ring for a11y — monochromatic inner ring */
+:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 4px;
 }
 
-input[type='number'] {
-  -moz-appearance: textfield;
+a {
+  color: inherit;
+  text-decoration: none;
 }
 
-.hidden {
-  display: none !important;
+b, strong {
+  font-weight: 700;
 }
