@@ -230,7 +230,7 @@ export function ScoreModal({ open, roundIdx, matchIdx, bracket, onClose }: Score
         >
           Reset Scores
         </button>
-        <button className={styles.saveBtn} onClick={handleSaveOnly}>Save Only</button>
+        <Button variant="ghost" onClick={handleSaveOnly}>Save Only</Button>
         <Button variant="primary" onClick={handleDeclareWinner}>Declare Winner →</Button>
       </div>
     </Modal>
