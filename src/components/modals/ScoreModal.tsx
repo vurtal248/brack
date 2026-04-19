@@ -115,7 +115,7 @@ export function ScoreModal({ open, roundIdx, matchIdx, bracket, onClose }: Score
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Score Match" maxWidth={360}>
+    <Modal open={open} onClose={onClose} title="Score Match" maxWidth={460}>
       <div className={styles.body}>
         <div className={styles.tableHeader}>
           <div />
