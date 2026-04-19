@@ -38,7 +38,7 @@ export function Home() {
             </Button>
           </div>
         ) : (
-          brackets.map((b) => {
+          brackets.map((b, index) => {
             const date = new Date(b.createdAt).toLocaleDateString('en-US', {
               month: 'short',
               day: 'numeric',
@@ -51,6 +51,7 @@ export function Home() {
                 className={styles.card}
                 role="listitem"
                 tabIndex={0}
+                style={{ animationDelay: `${index * 60}ms` }}
                 onClick={() => openEditor(b.id)}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') openEditor(b.id) }}
                 aria-label={`Open ${b.name} bracket`}
