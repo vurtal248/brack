@@ -1,32 +1,56 @@
+/* ── BracketViewer — Air Layout ────────────────────────────────── */
+
 .wrap {
   flex: 1;
   overflow: auto;
-  padding: 2rem;
+  padding: var(--space-6);
   display: flex;
   align-items: flex-start;
+  /* Mask edges so the diagram fades smoothly into the glass header */
+  mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%),
+              linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+  mask-composite: intersect;
 }
 
 .canvas {
   display: flex;
   align-items: stretch;
   min-width: max-content;
+  gap: var(--space-4); /* Add horizontal breathing room between rounds */
+  padding: var(--space-6);
 }
 
+/* ── Round column ────────────────────────────────────────────── */
 .roundCol {
   display: flex;
   flex-direction: column;
   position: relative;
 }
 
+/* Round label: floating pill layout */
 .roundHeader {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
-  color: var(--text-dim);
-  padding: 0 0.5rem 0.5rem;
-  border-bottom: 1px solid var(--border);
-  margin: 0 0.5rem 1rem;
+  letter-spacing: 0.05em;
+  color: var(--text-sub);
+  padding: 0 0.8rem var(--space-3);
+  margin: 0 0.4rem var(--space-4);
+  text-align: center;
+  /* Thin soft underline */
+  position: relative;
+}
+
+.roundHeader::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 20%;
+  right: 20%;
+  height: var(--border-width);
+  background: var(--border);
+  border-radius: var(--radius-pill);
 }
 
 .roundMatches {
@@ -43,42 +67,51 @@
   justify-content: center;
 }
 
+/* Bye spacer matches the match card footprint exactly */
 .byeSpacer {
-  width: 180px;
+  width: 200px;
   margin: 0.35rem 0.5rem;
-  /* Same height footprint as a 2-slot match card */
-  min-height: 64px;
+  min-height: 72px;
 }
 
+/* ── SVG connector column ────────────────────────────────────── */
 .connectorCol {
-  width: 30px;
+  width: 36px;
   display: flex;
   flex-direction: column;
   justify-content: space-around;
   flex-shrink: 0;
-  padding-top: 1.8rem;
+  padding-top: 2rem;
   position: relative;
 }
 
+/* ── Finals center column ────────────────────────────────────── */
 .centerCol {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0 1rem;
-  min-width: 200px;
+  padding: 0 var(--space-5);
+  min-width: 240px;
 }
 
+/* ── Champion column ─────────────────────────────────────────── */
 .championCol {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 0 1.5rem;
-  min-width: 160px;
+  padding: 0 var(--space-6);
+  min-width: 200px;
 }
 
+/* ── Responsive ──────────────────────────────────────────────── */
 @media (max-width: 640px) {
   .wrap {
-    padding: 1rem;
+    padding: var(--space-4);
+    mask-image: none;
+  }
+  .canvas {
+    padding: var(--space-4);
+    gap: var(--space-2);
   }
 }
