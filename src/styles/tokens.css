@@ -1,47 +1,60 @@
-/* ============================================================
-   DESIGN TOKENS — Brack V2
-   All color values use OKLCH for perceptual uniformity.
-   Easing curves match the motion design philosophy.
-   ============================================================ */
 :root {
   color-scheme: light dark;
 
-  /* Backgrounds */
-  --bg: light-dark(oklch(0.98 0.01 250), oklch(0.10 0.01 250));
-  --bg-2: light-dark(oklch(1.00 0.005 250), oklch(0.13 0.01 250));
-  --bg-3: light-dark(oklch(0.95 0.01 250), oklch(0.18 0.01 250));
+  /* ── Surfaces (Pure Achromatic) ─────────────────────────────── */
+  --bg:   light-dark(oklch(0.985 0 0), oklch(0.10 0 0));
+  --bg-2: light-dark(oklch(0.95 0 0),  oklch(0.14 0 0));
+  --bg-3: light-dark(oklch(0.90 0 0),  oklch(0.18 0 0));
+  --bg-glass: light-dark(oklch(0.985 0 0 / 0.7), oklch(0.10 0 0 / 0.65));
 
-  /* Borders */
-  --border: light-dark(oklch(0.85 0.01 250), oklch(0.25 0.01 250));
-  --border-hi: light-dark(oklch(0.70 0.01 250), oklch(0.35 0.01 250));
+  /* ── Typography (High contrast greyscale) ─────────────────── */
+  --text:     light-dark(oklch(0.10 0 0), oklch(0.98 0 0));
+  --text-sub: light-dark(oklch(0.45 0 0), oklch(0.70 0 0));
+  --text-dim: light-dark(oklch(0.65 0 0), oklch(0.50 0 0));
 
-  /* Typography */
-  --text: light-dark(oklch(0.20 0.01 250), oklch(0.90 0.01 250));
-  --text-dim: light-dark(oklch(0.40 0.01 250), oklch(0.65 0.01 250));
+  /* ── Borders (Barely-there structure) ────────────────lllllll */
+  --border:    light-dark(oklch(0.88 0 0), oklch(0.22 0 0));
+  --border-hi: light-dark(oklch(0.75 0 0), oklch(0.35 0 0));
+  --border-light: light-dark(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.05));
 
-  /* Accent (inverted fg/bg) */
-  --accent: light-dark(oklch(0.30 0.01 250), oklch(0.80 0.01 250));
-  --accent-dim: light-dark(oklch(0.93 0.01 250), oklch(0.20 0.01 250));
+  /* ── Semantic Monochromes (Replacing Green/Blue) ──────────── */
+  --primary: var(--text);
+  --primary-glow: light-dark(oklch(0 0 0 / 0.15), oklch(1 0 0 / 0.15));
+  --danger: light-dark(oklch(0.3 0 0), oklch(0.7 0 0)); /* Danger is now just high-contrast grey */
 
-  /* Win state */
-  --win: light-dark(oklch(0.15 0.01 250), oklch(0.95 0.01 250));
-  --win-glow: light-dark(oklch(0.92 0.01 250), oklch(0.25 0.01 250));
+  /* ── Architecture (Structural & Compact) ───────────────────────── */
+  --font-display: 'Bricolage Grotesque', sans-serif;
+  --font-mono: 'Azeret Mono', monospace;
+  --radius-sm: 4px;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 999px;
+  --border-width: 1px;
 
-  /* Danger */
-  --danger: light-dark(oklch(0.45 0.02 20), oklch(0.65 0.02 20));
-  --danger-dim: light-dark(oklch(0.95 0.01 20), oklch(0.18 0.01 20));
+  /* ── Depth & Elevation (Sharper, more compact rendering) ───── */
+  --shadow-sm: 0 1px 3px oklch(0 0 0 / 0.08);
+  --shadow: 
+    0 2px 4px oklch(0 0 0 / 0.04),
+    0 4px 8px oklch(0 0 0 / 0.04);
+  --shadow-hover: 
+    0 4px 6px oklch(0 0 0 / 0.04),
+    0 8px 16px oklch(0 0 0 / 0.06);
+  --shadow-active: 0 1px 2px oklch(0 0 0 / 0.1);
 
-  /* Shape */
-  --radius: 2px;
-  --radius-lg: 4px;
+  /* ── Animation ─────────────────────────────────────────────── */
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.15); /* Snappy */
+  --ease-fluid: cubic-bezier(0.25, 1, 0.5, 1);           /* Smooth */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);            /* Strong UI interactions */
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);        /* On-screen movement */
 
-  /* Typography */
-  --font-display: 'Chivo', sans-serif;
-  --font-mono: 'Chivo Mono', monospace;
-
-  /* Motion — Snappy, mechanical easing curves */
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);     /* Snappy expo-like ease-out */
-  --ease-in-out: cubic-bezier(0.83, 0, 0.17, 1); /* Sharp acceleration/deceleration */
-  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
-  --transition: 0.15s var(--ease-out);
+  /* ── Spacing (Tightened for compact feel) ──────────────────── */
+  --space-1: 0.25rem;
+  --space-2: 0.4rem;
+  --space-3: 0.6rem;
+  --space-4: 0.85rem;
+  --space-5: 1.25rem;
+  --space-6: 1.7rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
 }
