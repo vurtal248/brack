@@ -40,7 +40,7 @@ function makePath(
   const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
   path.setAttribute('d', d)
   path.setAttribute('fill', 'none')
-  path.setAttribute('stroke', active ? 'var(--win)' : stroke)
+  path.setAttribute('stroke', active ? 'var(--text)' : stroke)
   // Neo-Brutalist thick lines
   path.setAttribute('stroke-width', active ? '3' : '2')
   path.setAttribute('stroke-linecap', 'square')
