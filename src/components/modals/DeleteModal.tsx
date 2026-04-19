@@ -21,10 +21,12 @@ export function DeleteModal({ open, bracketId, bracketName, onClose }: DeleteMod
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Delete Bracket?" maxWidth={380}>
-      <p className={styles.body}>
-        <strong>"{bracketName}"</strong> will be permanently deleted. This cannot be undone.
-      </p>
+    <Modal open={open} onClose={onClose} title="Delete Bracket?" maxWidth={320}>
+      <div className={styles.body}>
+        <p className={styles.text}>
+          <strong>"{bracketName}"</strong> will be permanently deleted. This cannot be undone.
+        </p>
+      </div>
       <div className={styles.footer}>
         <Button variant="ghost" onClick={onClose}>Keep It</Button>
         <Button variant="danger" onClick={handleConfirm} style={{ padding: '0.55rem 1.25rem' }}>
