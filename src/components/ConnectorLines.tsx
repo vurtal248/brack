@@ -35,16 +35,21 @@ function makePath(
   svg: SVGSVGElement,
   d: string,
   stroke: string,
-  strokeWidth: string,
   active: boolean,
 ) {
   const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
   path.setAttribute('d', d)
   path.setAttribute('fill', 'none')
   path.setAttribute('stroke', active ? 'var(--win)' : stroke)
-  path.setAttribute('stroke-width', strokeWidth)
-  path.setAttribute('stroke-linecap', 'round')
-  path.setAttribute('stroke-linejoin', 'round')
+  // Neo-Brutalist thick lines
+  path.setAttribute('stroke-width', active ? '3' : '2')
+  path.setAttribute('stroke-linecap', 'square')
+  path.setAttribute('stroke-linejoin', 'miter')
+  
+  if (active) {
+    path.classList.add('path-draw-anim')
+  }
+
   svg.appendChild(path)
 }
 
@@ -131,7 +136,6 @@ function drawSideConnectors(
       const topWon = topM?.winnerId != null
       const btmWon = btmM?.winnerId != null
       const cssVar = topWon || btmWon ? 'var(--win)' : 'var(--border)'
-      const sw = topWon || btmWon ? '1.5' : '1'
 
       const maxR = Math.min(8, xMid)
       const cr = Math.min(maxR, Math.abs(yMid - y1))
@@ -139,9 +143,9 @@ function drawSideConnectors(
       const topVDir = yMid >= y1 ? cr : -cr
       const btmVDir = yMid <= y2 ? -cr : cr
 
-      makePath(svg, `M ${x0top} ${y1} H ${cx} Q ${xMid} ${y1} ${xMid} ${y1 + topVDir} V ${yMid}`, cssVar, sw, topWon)
-      makePath(svg, `M ${x0btm} ${y2} H ${cx} Q ${xMid} ${y2} ${xMid} ${y2 + btmVDir} V ${yMid}`, cssVar, sw, btmWon)
-      makePath(svg, `M ${xMid} ${yMid} H ${xEnd}`, cssVar, sw, nextExists)
+      makePath(svg, `M ${x0top} ${y1} H ${cx} Q ${xMid} ${y1} ${xMid} ${y1 + topVDir} V ${yMid}`, cssVar, topWon)
+      makePath(svg, `M ${x0btm} ${y2} H ${cx} Q ${xMid} ${y2} ${xMid} ${y2 + btmVDir} V ${yMid}`, cssVar, btmWon)
+      makePath(svg, `M ${xMid} ${yMid} H ${xEnd}`, cssVar, nextExists)
     } else {
       if (topIsBye && btmIsBye) continue
       const realMatchEl = topIsBye ? btmMatchEl : topMatchEl
@@ -157,7 +161,6 @@ function drawSideConnectors(
 
       const won = realM?.winnerId != null
       const cssVar = won ? 'var(--win)' : 'var(--border)'
-      const sw = won ? '1.5' : '1'
       const maxR = Math.min(8, xMid)
       const cR = Math.min(maxR, Math.abs(yEnd - y1) / 2)
       const vDir = yEnd >= y1 ? 1 : -1
@@ -167,7 +170,7 @@ function drawSideConnectors(
         svg,
         `M ${x0} ${y1} H ${c1x} Q ${xMid} ${y1} ${xMid} ${y1 + vDir * cR}` +
         ` V ${yEnd - vDir * cR} Q ${xMid} ${yEnd} ${c2x} ${yEnd} H ${xEnd}`,
-        cssVar, sw, nextExists,
+        cssVar, nextExists,
       )
     }
   }
@@ -210,7 +213,6 @@ function drawToCenterConnectors(
 
   const topWon = bracket.rounds[r]?.[m]?.winnerId != null
   const cssVar = topWon ? 'var(--win)' : 'var(--border)'
-  const sw = topWon ? '1.5' : '1'
   const xMid = colRect.width / 2
   const maxR = Math.min(8, xMid)
   const cR = Math.min(maxR, Math.abs(yEnd - y1) / 2)
@@ -222,6 +224,6 @@ function drawToCenterConnectors(
     svg,
     `M ${x0} ${y1} H ${c1x} Q ${xMid} ${y1} ${xMid} ${y1 + vDir * cR}` +
     ` V ${yEnd - vDir * cR} Q ${xMid} ${yEnd} ${c2x} ${yEnd} H ${xEnd}`,
-    cssVar, sw, topWon,
+    cssVar, topWon,
   )
 }
