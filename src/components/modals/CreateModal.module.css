@@ -1,43 +1,95 @@
+/* ── CreateModal — Soft rounded inputs ───────────────────────── */
+
+.body {
+  padding: 0 var(--space-5) var(--space-3);
+  width: 100%;
+}
+
+.footer {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+  padding: var(--space-3) var(--space-5);
+  background: var(--bg-2);
+  border-top: var(--border-width) solid var(--border);
+}
+
 .formGroup {
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4); /* Reduced from --space-6 */
 }
 
 .label {
   display: block;
-  font-size: 0.7rem;
+  font-family: var(--font-display);
+  font-size: 0.7rem; /* Tighter labels */
   font-weight: 700;
   text-transform: uppercase;
-  color: var(--text-dim);
-  margin-bottom: 0.4rem;
+  letter-spacing: 0.05em;
+  color: var(--text-sub);
+  margin-bottom: var(--space-2); /* Brought closer to input */
 }
 
 .optional {
   opacity: 0.5;
+  font-weight: 500;
 }
 
+/* Base input styling for text and numbers */
+.formGroup input[type='text'],
+.formGroup input[type='number'] {
+  width: 100%;
+  padding: 0.5rem 0.65rem; /* Strict compact input hitboxes */
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text);
+  background: var(--bg-2);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  outline: none;
+  transition: all 200ms var(--ease-fluid);
+  -webkit-appearance: none;
+}
+
+.formGroup input:focus {
+  background: var(--bg);
+  border-color: var(--text);
+  box-shadow: 0 0 0 4px var(--border-hi); /* Monochromatic focus ring */
+}
+
+.formGroup input::placeholder {
+  color: var(--text-dim);
+  font-weight: 400;
+}
+
+/* Checkbox row: inline with text label */
 .checkRow {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-  font-size: 0.8rem;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3); /* Tigher stacking */
+  padding: var(--space-1) 0;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
 }
 
+/* Styled checkbox: heavily rounded */
 .checkRow input[type='checkbox'] {
-  width: auto;
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
   padding: 0;
   cursor: pointer;
   flex-shrink: 0;
+  accent-color: var(--primary);
+  border-radius: 6px;
 }
 
 .checkRow label {
   cursor: pointer;
   color: var(--text);
-}
-
-.footer {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: flex-end;
-  margin-top: 1.5rem;
+  line-height: 1.4;
 }
