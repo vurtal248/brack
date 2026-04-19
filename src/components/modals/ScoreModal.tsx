@@ -115,106 +115,108 @@ export function ScoreModal({ open, roundIdx, matchIdx, bracket, onClose }: Score
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Score Match" maxWidth={420}>
-      <div className={styles.tableHeader}>
-        <div />
-        <div className={[styles.colLabel, styles.winnerCol].join(' ')}>Winner</div>
-        <div className={[styles.colLabel, styles.scoreCol].join(' ')}>Score</div>
-      </div>
+    <Modal open={open} onClose={onClose} title="Score Match" maxWidth={360}>
+      <div className={styles.body}>
+        <div className={styles.tableHeader}>
+          <div />
+          <div className={[styles.colLabel, styles.winnerCol].join(' ')}>Winner</div>
+          <div className={[styles.colLabel, styles.scoreCol].join(' ')}>Score</div>
+        </div>
 
-      <div className={styles.setsContainer}>
-        {/* P1 Row */}
-        <div className={[styles.row, selectedWinner === 'p1' ? styles.isWinner : ''].join(' ')}>
-          <div className={styles.identity}>
-            <span className={styles.seed}>{p1Seed}</span>
-            <span className={styles.name}>{p1Name}</span>
-          </div>
-          <div className={styles.winnerCell}>
-            <div
-              className={[styles.winnerCheck, selectedWinner === 'p1' ? styles.checked : ''].join(
-                ' '
-              )}
-              role="checkbox"
-              aria-checked={selectedWinner === 'p1'}
-              tabIndex={0}
-              onClick={() => handleWinnerToggle('p1')}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleWinnerToggle('p1') }}
-            >
-              <CheckIcon />
+        <div className={styles.setsContainer}>
+          {/* P1 Row */}
+          <div className={[styles.row, selectedWinner === 'p1' ? styles.isWinner : ''].join(' ')}>
+            <div className={styles.identity}>
+              <span className={styles.seed}>{p1Seed}</span>
+              <span className={styles.name}>{p1Name}</span>
+            </div>
+            <div className={styles.winnerCell}>
+              <div
+                className={[styles.winnerCheck, selectedWinner === 'p1' ? styles.checked : ''].join(
+                  ' '
+                )}
+                role="checkbox"
+                aria-checked={selectedWinner === 'p1'}
+                tabIndex={0}
+                onClick={() => handleWinnerToggle('p1')}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleWinnerToggle('p1') }}
+              >
+                <CheckIcon />
+              </div>
+            </div>
+            <div className={styles.scoreCell}>
+              <div className={styles.stepper}>
+                <button className={styles.stepperBtn} onClick={() => handleStepper('p1', -1)}>−</button>
+                <input
+                  className={styles.stepperVal}
+                  type="number"
+                  min="0"
+                  value={currentSet.p1 !== '' ? currentSet.p1 : 0}
+                  onChange={(e) => handleUpdateScore('p1', e.target.value === '' ? '' : parseFloat(e.target.value))}
+                />
+                <button className={styles.stepperBtn} onClick={() => handleStepper('p1', 1)}>+</button>
+              </div>
             </div>
           </div>
-          <div className={styles.scoreCell}>
-            <div className={styles.stepper}>
-              <button className={styles.stepperBtn} onClick={() => handleStepper('p1', -1)}>−</button>
-              <input
-                className={styles.stepperVal}
-                type="number"
-                min="0"
-                value={currentSet.p1 !== '' ? currentSet.p1 : 0}
-                onChange={(e) => handleUpdateScore('p1', e.target.value === '' ? '' : parseFloat(e.target.value))}
-              />
-              <button className={styles.stepperBtn} onClick={() => handleStepper('p1', 1)}>+</button>
+
+          {/* P2 Row */}
+          <div className={[styles.row, selectedWinner === 'p2' ? styles.isWinner : ''].join(' ')}>
+            <div className={styles.identity}>
+              <span className={styles.seed}>{p2Seed}</span>
+              <span className={styles.name}>{p2Name}</span>
+            </div>
+            <div className={styles.winnerCell}>
+              <div
+                className={[styles.winnerCheck, selectedWinner === 'p2' ? styles.checked : ''].join(
+                  ' '
+                )}
+                role="checkbox"
+                aria-checked={selectedWinner === 'p2'}
+                tabIndex={0}
+                onClick={() => handleWinnerToggle('p2')}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleWinnerToggle('p2') }}
+              >
+                <CheckIcon />
+              </div>
+            </div>
+            <div className={styles.scoreCell}>
+              <div className={styles.stepper}>
+                <button className={styles.stepperBtn} onClick={() => handleStepper('p2', -1)}>−</button>
+                <input
+                  className={styles.stepperVal}
+                  type="number"
+                  min="0"
+                  value={currentSet.p2 !== '' ? currentSet.p2 : 0}
+                  onChange={(e) => handleUpdateScore('p2', e.target.value === '' ? '' : parseFloat(e.target.value))}
+                />
+                <button className={styles.stepperBtn} onClick={() => handleStepper('p2', 1)}>+</button>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* P2 Row */}
-        <div className={[styles.row, selectedWinner === 'p2' ? styles.isWinner : ''].join(' ')}>
-          <div className={styles.identity}>
-            <span className={styles.seed}>{p2Seed}</span>
-            <span className={styles.name}>{p2Name}</span>
+        {/* Sets Footer */}
+        <div className={styles.setTabsWrapper}>
+          <div className={styles.setTabs}>
+            {sets.map((_, i) => (
+              <button
+                key={i}
+                className={[styles.setPip, i === currentSetIdx ? styles.activePip : ''].join(' ')}
+                onClick={() => setCurrentSetIdx(i)}
+              >
+                Set {i + 1}
+              </button>
+            ))}
           </div>
-          <div className={styles.winnerCell}>
-            <div
-              className={[styles.winnerCheck, selectedWinner === 'p2' ? styles.checked : ''].join(
-                ' '
-              )}
-              role="checkbox"
-              aria-checked={selectedWinner === 'p2'}
-              tabIndex={0}
-              onClick={() => handleWinnerToggle('p2')}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleWinnerToggle('p2') }}
-            >
-              <CheckIcon />
-            </div>
-          </div>
-          <div className={styles.scoreCell}>
-            <div className={styles.stepper}>
-              <button className={styles.stepperBtn} onClick={() => handleStepper('p2', -1)}>−</button>
-              <input
-                className={styles.stepperVal}
-                type="number"
-                min="0"
-                value={currentSet.p2 !== '' ? currentSet.p2 : 0}
-                onChange={(e) => handleUpdateScore('p2', e.target.value === '' ? '' : parseFloat(e.target.value))}
-              />
-              <button className={styles.stepperBtn} onClick={() => handleStepper('p2', 1)}>+</button>
-            </div>
-          </div>
+          <button className={styles.addSetBtn} onClick={handleAddSet}>+ Add Set</button>
         </div>
-      </div>
 
-      {/* Sets Footer */}
-      <div className={styles.setTabsWrapper}>
-        <div className={styles.setTabs}>
-          {sets.map((_, i) => (
-            <button
-              key={i}
-              className={[styles.setPip, i === currentSetIdx ? styles.activePip : ''].join(' ')}
-              onClick={() => setCurrentSetIdx(i)}
-            >
-              Set {i + 1}
-            </button>
-          ))}
+        <div
+          className={styles.seriesHint}
+          style={hintMsg?.danger ? { color: 'var(--danger)' } : undefined}
+        >
+          {hintMsg ? hintMsg.text : seriesHint}
         </div>
-        <button className={styles.addSetBtn} onClick={handleAddSet}>+ Add Set</button>
-      </div>
-
-      <div
-        className={styles.seriesHint}
-        style={hintMsg?.danger ? { color: 'var(--danger)' } : undefined}
-      >
-        {hintMsg ? hintMsg.text : seriesHint}
       </div>
 
       <div className={styles.submitFooter}>
