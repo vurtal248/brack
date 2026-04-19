@@ -135,8 +135,7 @@ function drawSideConnectors(
 
       const topWon = topM?.winnerId != null
       const btmWon = btmM?.winnerId != null
-      const cssVar = topWon || btmWon ? 'var(--win)' : 'var(--border)'
-
+      const cssVar = topWon || btmWon ? 'var(--text)' : 'var(--border)'
       const maxR = Math.min(8, xMid)
       const cr = Math.min(maxR, Math.abs(yMid - y1))
       const cx = isReversed ? xMid + cr : xMid - cr
@@ -160,7 +159,7 @@ function drawSideConnectors(
       if (Math.abs(yEnd - y1) <= 4) yEnd = y1
 
       const won = realM?.winnerId != null
-      const cssVar = won ? 'var(--win)' : 'var(--border)'
+      const cssVar = won ? 'var(--text)' : 'var(--border)'
       const maxR = Math.min(8, xMid)
       const cR = Math.min(maxR, Math.abs(yEnd - y1) / 2)
       const vDir = yEnd >= y1 ? 1 : -1
@@ -212,7 +211,7 @@ function drawToCenterConnectors(
   if (Math.abs(yEnd - y1) <= 4) yEnd = y1
 
   const topWon = bracket.rounds[r]?.[m]?.winnerId != null
-  const cssVar = topWon ? 'var(--win)' : 'var(--border)'
+  const cssVar = topWon ? 'var(--text)' : 'var(--border)'
   const xMid = colRect.width / 2
   const maxR = Math.min(8, xMid)
   const cR = Math.min(maxR, Math.abs(yEnd - y1) / 2)
