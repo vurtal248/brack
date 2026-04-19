@@ -53,6 +53,7 @@ interface AppState {
 
   // Bracket mutations (all persist immediately)
   updateParticipantName: (pid: number, name: string) => void
+  reorderParticipants: (startIndex: number, endIndex: number) => void
   randomizeSeeds: () => void
   startBracket: () => void
   resetBracket: () => void
@@ -130,6 +131,21 @@ export const useAppStore = create<AppState>((set, get) => {
       const updated: Bracket = {
         ...b,
         participants: b.participants.map((p) => (p.id === pid ? { ...p, name } : p)),
+      }
+      upsertBracket(updated)
+      set({ brackets: loadBrackets() })
+    },
+
+    reorderParticipants: (startIndex, endIndex) => {
+      const b = get().getActiveBracket()
+      if (!b) return
+      const reordered = Array.from(b.participants)
+      const [removed] = reordered.splice(startIndex, 1)
+      reordered.splice(endIndex, 0, removed)
+      
+      const updated: Bracket = {
+        ...b,
+        participants: reordered,
       }
       upsertBracket(updated)
       set({ brackets: loadBrackets() })
