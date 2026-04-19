@@ -201,6 +201,10 @@
   font-weight: 500;
 }
 
+.pInput:focus-visible {
+  outline: none;
+}
+
 /* ── Responsive ──────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .header {
