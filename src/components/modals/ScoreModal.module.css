@@ -150,6 +150,13 @@
   width: 40px;
   min-width: 0;
   outline: none;
+  -moz-appearance: textfield;
+}
+
+.stepperVal::-webkit-outer-spin-button,
+.stepperVal::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .stepperBtn {
