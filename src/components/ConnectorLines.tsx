@@ -180,9 +180,9 @@ function drawToCenterConnectors(
   bracket: Bracket,
   r: number,
   m: number,
-  _limit: number,
+  _limit: number,   // reserved — only one match connects to center per side
   srcPre: string,
-  _dstPre: string,
+  _dstPre: string,  // always 'C'; kept for signature symmetry with drawSideConnectors
   isReversed: boolean,
 ) {
   const connectorId = isReversed ? `connector-C-R` : `connector-C-L`
@@ -199,6 +199,7 @@ function drawToCenterConnectors(
   const topRect = topMatchEl.getBoundingClientRect()
   const nxtRect = nextMatchEl.getBoundingClientRect()
 
+  // x0/xEnd swap: reversed side reads from the left edge of source, right edge of dest
   let x0 = topRect.right - colRect.left
   let xEnd = nxtRect.left - colRect.left
   if (isReversed) {
