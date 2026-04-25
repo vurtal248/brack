@@ -257,6 +257,7 @@ export function getSeedNumber(bracket: Bracket, id: number | null): number | '' 
   const pIdx = bracket.participants.findIndex((p) => p.id === id)
   if (pIdx === -1) return ''
   if (bracket.doubleSeed) {
+    // Each conference seeds from 1, so the second-half index is offset back by half
     const half = Math.ceil(bracket.participants.length / 2)
     return pIdx < half ? pIdx + 1 : pIdx - half + 1
   }
@@ -289,34 +290,36 @@ export function calculateAutoWinner(sets: MatchSet[]): 'p1' | 'p2' | null {
 
 export function getSeriesText(bracket: Bracket, match: Match): string {
   if (!match.sets || match.sets.length <= 1) return ''
-  let p1w = 0
-  let p2w = 0
+  let p1Wins = 0
+  let p2Wins = 0
   for (const s of match.sets) {
-    const a = parseFloat(String(s.p1))
-    const b = parseFloat(String(s.p2))
-    if (!isNaN(a) && !isNaN(b) && (a !== 0 || b !== 0)) {
-      if (a > b) p1w++
-      else if (b > a) p2w++
+    const scoreA = parseFloat(String(s.p1))
+    const scoreB = parseFloat(String(s.p2))
+    // Skip sets that are all-zero (unentered) or unparseable
+    if (!isNaN(scoreA) && !isNaN(scoreB) && (scoreA !== 0 || scoreB !== 0)) {
+      if (scoreA > scoreB) p1Wins++
+      else if (scoreB > scoreA) p2Wins++
     }
   }
   const p1Name = getParticipantName(bracket, match.p1Id) || 'P1'
   const p2Name = getParticipantName(bracket, match.p2Id) || 'P2'
   if (match.winnerId != null) {
-    const wName = match.winnerId === match.p1Id ? p1Name : p2Name
-    const wWins = match.winnerId === match.p1Id ? p1w : p2w
-    const lWins = match.winnerId === match.p1Id ? p2w : p1w
+    const winnerIsP1 = match.winnerId === match.p1Id
+    const wName = winnerIsP1 ? p1Name : p2Name
+    const wWins = winnerIsP1 ? p1Wins : p2Wins
+    const lWins = winnerIsP1 ? p2Wins : p1Wins
     return `${wName} WINS ${wWins}-${lWins}`
   }
-  if (p1w > p2w) return `${p1Name} LEADS ${p1w}-${p2w}`
-  if (p2w > p1w) return `${p2Name} LEADS ${p2w}-${p1w}`
-  return `SERIES TIED ${p1w}-${p2w}`
+  if (p1Wins > p2Wins) return `${p1Name} LEADS ${p1Wins}-${p2Wins}`
+  if (p2Wins > p1Wins) return `${p2Name} LEADS ${p2Wins}-${p1Wins}`
+  return `SERIES TIED ${p1Wins}-${p2Wins}`
 }
 
 export function shuffleParticipants(bracket: Bracket): Bracket {
+  // Fisher-Yates shuffle on a deep clone to stay immutable
   const b: Bracket = JSON.parse(JSON.stringify(bracket))
   for (let i = b.participants.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-      ;[b.participants[i], b.participants[j]] = [b.participants[j], b.participants[i]]
+    const j = Math.floor(Math.random() * (i + 1));[b.participants[i], b.participants[j]] = [b.participants[j], b.participants[i]]
   }
   return b
 }
