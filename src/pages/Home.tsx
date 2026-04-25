@@ -74,12 +74,12 @@ export function Home() {
                 </div>
 
                 <div className={styles.meta}>
-                  <span className={[
-                    styles.statusPill,
-                    b.status === 'seeding' ? styles.seeding : b.status === 'active' ? styles.active : styles.complete
-                  ].join(' ')}>
-                    {b.status === 'seeding' ? 'Seeding' : b.status === 'active' ? 'In Progress' : '✓ Complete'}
-                  </span>
+                  {(() => {
+                    // Derive pill class and label from status in one place
+                    const statusClass = b.status === 'seeding' ? styles.seeding : b.status === 'active' ? styles.active : styles.complete
+                    const statusLabel = b.status === 'seeding' ? 'Seeding' : b.status === 'active' ? 'In Progress' : '✓ Complete'
+                    return <span className={[styles.statusPill, statusClass].join(' ')}>{statusLabel}</span>
+                  })()}
                   {b.tag && <span className={styles.tagPill}>{b.tag}</span>}
                 </div>
 
@@ -115,6 +115,7 @@ function PlusIcon() {
     </svg>
   )
 }
+
 function TrashIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
@@ -122,6 +123,7 @@ function TrashIcon() {
     </svg>
   )
 }
+
 function UsersIcon() {
   return (
     <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
@@ -130,6 +132,7 @@ function UsersIcon() {
     </svg>
   )
 }
+
 function CalendarIcon() {
   return (
     <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
