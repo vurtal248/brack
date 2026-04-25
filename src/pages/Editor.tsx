@@ -156,17 +156,19 @@ export function Editor() {
   )
 }
 
-function ParticipantRow({ pid, name, seed, onChange, autoFocus, innerRef, draggableProps, dragHandleProps, isDragging }: {
+interface ParticipantRowProps {
   pid: number
   name: string
   seed: number | ''
   onChange: (val: string) => void
   autoFocus?: boolean
-  innerRef?: (element?: HTMLElement | null) => void
+  innerRef?: React.LegacyRef<HTMLDivElement>
   draggableProps?: any
   dragHandleProps?: any
   isDragging?: boolean
-}) {
+}
+
+function ParticipantRow({ pid, name, seed, onChange, autoFocus, innerRef, draggableProps, dragHandleProps, isDragging }: ParticipantRowProps) {
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -216,6 +218,7 @@ function BackIcon() {
     </svg>
   )
 }
+
 function ShuffleIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
