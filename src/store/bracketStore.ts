@@ -117,6 +117,7 @@ export const useAppStore = create<AppState>((set, get) => {
     },
 
     deleteBracket: (id) => {
+      // Note: `deleteBracket` here is the imported storage util (see imports)
       deleteBracket(id)
       const { activeBracketId } = get()
       set({
@@ -209,7 +210,7 @@ export const useAppStore = create<AppState>((set, get) => {
           thirdPlaceMatch: { ...b.thirdPlaceMatch, sets: cleanSets, winnerId },
         }
       } else {
-        // Patch the sets on the specific match
+        // Deep-clone before mutating sets directly — advanceWinner will re-clone internally
         b = JSON.parse(JSON.stringify(b)) as Bracket
         b.rounds[roundIdx][matchIdx].sets = cleanSets
         if (winnerId != null) {
