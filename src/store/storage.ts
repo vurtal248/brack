@@ -49,3 +49,5 @@ export function upsertBracket(bracket: Bracket): void {
 export function deleteBracket(id: string): void {
   saveBrackets(loadBrackets().filter((b) => b.id !== id))
 }
+
+
