@@ -46,3 +46,5 @@ export function ChampionCard({ bracket, onScoreMatch, style }: ChampionCardProps
     </div>
   )
 }
+
+
