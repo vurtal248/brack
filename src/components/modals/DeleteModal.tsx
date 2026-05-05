@@ -36,3 +36,5 @@ export function DeleteModal({ open, bracketId, bracketName, onClose }: DeleteMod
     </Modal>
   )
 }
+
+
