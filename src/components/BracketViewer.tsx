@@ -201,3 +201,5 @@ function ChampionCol({ bracket, onScoreMatch }: {
 function ConnectorCol({ id }: { id: string }) {
   return <div className={styles.connectorCol} id={id} />
 }
+
+
